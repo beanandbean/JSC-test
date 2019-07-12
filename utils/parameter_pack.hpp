@@ -1,5 +1,7 @@
-#ifndef utils_hpp
-#define utils_hpp
+#ifndef utils_parameter_pack_hpp
+#define utils_parameter_pack_hpp
+
+#include <cstddef>
 
 template <typename... types>
 struct parameter_pack_counter {
@@ -14,4 +16,4 @@ struct parameter_pack_counter<t0, types...> {
   static constexpr size_t count = 1 + parameter_pack_count<types...>;
 };
 
-#endif /* utils_hpp */
+#endif  // utils_parameter_pack_hpp

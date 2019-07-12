@@ -46,4 +46,4 @@ struct property {
 
 }  // namespace jsc
 
-#endif /* jsc_property_hpp */
+#endif  // jsc_property_hpp

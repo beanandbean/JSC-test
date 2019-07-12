@@ -44,4 +44,4 @@ struct value {
 
 }  // namespace jsc
 
-#endif /* jsc_value_hpp */
+#endif  // jsc_value_hpp

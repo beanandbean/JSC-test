@@ -4,8 +4,8 @@
 #include <algorithm>
 #include <array>
 
+#include "../utils/parameter_pack.hpp"
 #include "context.hpp"
-#include "utils.hpp"
 
 namespace jsc {
 
@@ -45,4 +45,4 @@ value object::callWithThisRef(JSObjectRef obj, arg_types... args) const {
 
 }  // namespace jsc
 
-#endif /* jsc_object_inc */
+#endif  // jsc_object_inc

@@ -36,4 +36,4 @@ struct string_wrapper {
 
 }  // namespace jsc::details
 
-#endif /* jsc_string_hpp */
+#endif  // jsc_string_hpp

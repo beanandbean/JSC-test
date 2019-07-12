@@ -2,6 +2,15 @@
 
 namespace jsc {
 
+value context::eval_script(std::string script, std::string source_url) {
+  const details::string_wrapper js_url{source_url};
+  const details::string_wrapper js_script{script};
+  return {*this, try_throwable([this, &js_script, &js_url](auto exception) {
+            return JSEvaluateScript(_ref, js_script.managed_ref(), nullptr,
+                                    js_url.managed_ref(), 0, exception);
+          })};
+}
+
 JSValueRef context::callback_class_call(JSContextRef ctx, JSObjectRef function,
                                         JSObjectRef this_object,
                                         size_t argument_count,
@@ -29,14 +38,6 @@ JSClassRef context::callback_class() {
     _callback_class = JSClassCreate(&def);
   }
   return _callback_class;
-}
-
-value context::eval_script(std::string script, JSStringRef source_url) {
-  const details::string_wrapper js_script{script};
-  return {*this, try_throwable([this, &js_script, &source_url](auto exception) {
-            return JSEvaluateScript(_ref, js_script.managed_ref(), nullptr,
-                                    source_url, 0, exception);
-          })};
 }
 
 }  // namespace jsc

@@ -69,4 +69,4 @@ struct object {
 
 }  // namespace jsc
 
-#endif /* jsc_object_hpp */
+#endif  // jsc_object_hpp

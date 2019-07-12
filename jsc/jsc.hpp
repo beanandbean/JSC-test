@@ -1,3 +1,6 @@
+// Wrapper for JavaScriptCore C API
+//   @ https://github.com/WebKit/webkit/tree/master/Source/JavaScriptCore/API
+
 #ifndef jsc_hpp
 #define jsc_hpp
 
@@ -8,4 +11,4 @@
 
 #include "object.inc.hpp"
 
-#endif /* jsc_hpp */
+#endif  // jsc_hpp

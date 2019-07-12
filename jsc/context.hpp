@@ -137,13 +137,7 @@ struct context {
   inline const value& get_exception() const { return _exception; }
   inline void clear_exception() { _exception = undefined(); }
 
-  inline value eval_script(std::string script) {
-    return eval_script(script, nullptr);
-  }
-  inline value eval_script(std::string script, std::string source_url) {
-    const details::string_wrapper js_url{source_url};
-    return eval_script(script, js_url.managed_ref());
-  }
+  value eval_script(std::string script, std::string source_url = "<anonymous>");
 
  private:
   JSGlobalContextRef _ref;
@@ -178,8 +172,6 @@ struct context {
     JSGlobalContextRelease(_ref);
   }
 
-  value eval_script(std::string script, JSStringRef source_url);
-
  public:
   inline object error(std::string message) {
     // TODO: Add error subclassing
@@ -196,4 +188,4 @@ struct context {
 
 }  // namespace jsc
 
-#endif /* jsc_context_hpp */
+#endif  // jsc_context_hpp
