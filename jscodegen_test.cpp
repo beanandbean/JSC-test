@@ -2,7 +2,7 @@
 
 #include "jscodegen/jscodegen.hpp"
 
-#include "utils/string.hpp"
+#include "utils/universal_value.hpp"
 
 int main() {
   jscodegen::generator gen;
