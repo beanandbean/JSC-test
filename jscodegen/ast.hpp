@@ -1,73 +1,144 @@
 #ifndef jscodegen_ast_hpp
 #define jscodegen_ast_hpp
 
-#include "source_loc.hpp"
+#include <string>
 
-namespace jsast::ast {
+#include "specs.hpp"
 
-// TODO: For reference... may not actually be needed later
-enum class node_type {
-  program,
-  block_statement,
-  class_body,
-  empty_statement,
-  expression_statement,
-  if_statement,
-  labeled_statement,
-  break_statement,
-  continue_statement,
-  with_statement,
-  switch_statement,
-  return_statement,
-  throw_statement,
-  try_statement,
-  while_statement,
-  do_while_statement,
-  for_statement,
-  for_in_statement,
-  for_of_statement,
-  debugger_statement,
-  function_declaration,
-  function_expression,
-  variable_declaration,
-  variable_declarator,
-  class_declaration,
-  import_declaration,
-  export_default_declaration,
-  export_named_declaration,
-  export_all_declaration,
-  method_definition,
-  class_expression,
-  arrow_function_expression,
-  this_expression,
-  rest_element,
-  spread_element,
-  yield_expression,
-  await_expression,
-  template_literal,
-  tagged_template_expression,
-  array_expression,
-  array_pattern,
-  object_expression,
-  property,
-  object_pattern,
-  sequence_expression,
-  unary_expression,
-  update_expression,
-  assignment_expression,
-  assignment_pattern,
-  binary_expression,
-  logical_expression,
-  conditional_expression,
-  new_expression,
-  call_expression,
-  member_expression,
-  meta_property,
-  identifier,
-  literal,
-  reg_exp_literal
+namespace jscodegen {
+
+enum class unary_op_location { prefix, suffix };
+
+namespace ast {
+
+struct base {
+ protected:
+  inline base() noexcept {}
 };
 
-}  // namespace jsast::ast
+struct super : base {
+  inline super() noexcept {}
+  inline constexpr ast_node_type type() const noexcept {
+    return ast_node_type::super;
+  }
+};
+
+struct expression : base {
+ protected:
+  inline expression() noexcept {}
+};
+
+struct this_expression : expression {
+  inline this_expression() noexcept {}
+  inline constexpr ast_node_type type() const noexcept {
+    return ast_node_type::this_expression;
+  }
+};
+
+template <typename argument_type>
+struct unary_expression : expression {
+  unary_op op;
+  argument_type argument;
+
+  inline unary_expression(unary_op _op, argument_type&& _argument)
+      : op{_op}, argument{std::forward<argument_type>(_argument)} {}
+  inline constexpr ast_node_type type() const noexcept {
+    return ast_node_type::unary_expression;
+  }
+};
+
+template <typename left_type, typename right_type>
+struct assignment_expression : expression {
+  left_type left;
+  assignment_op op;
+  right_type right;
+
+  inline assignment_expression(left_type&& _left, assignment_op _op, right_type&& _right)
+      : left{std::forward<left_type>(_left)}, op{_op}, right{std::forward<right_type>(_right)} {}
+  inline constexpr ast_node_type type() const noexcept {
+    return ast_node_type::assignment_expression;
+  }
+};
+
+template <typename argument_type>
+struct update_expression : expression {
+  update_op op;
+  argument_type argument;
+  unary_op_location loc;
+
+  inline update_expression(update_op _op, argument_type&& _argument,
+                           unary_op_location _loc)
+      : op{_op}, argument{std::forward<argument_type>(_argument)}, loc{_loc} {}
+  inline constexpr ast_node_type type() const noexcept {
+    return ast_node_type::update_expression;
+  }
+};
+
+struct pattern : base {
+ protected:
+  inline pattern() noexcept {}
+};
+
+struct identifier : pattern {
+  std::string name;
+
+  inline identifier(std::string _name) : name{_name} {}
+  inline constexpr ast_node_type type() const noexcept {
+    return ast_node_type::identifier;
+  }
+};
+
+struct literal : expression {
+ protected:
+  inline literal() noexcept {}
+};
+
+struct null_literal : literal {
+  inline null_literal() noexcept {}
+  inline constexpr ast_node_type type() const noexcept {
+    return ast_node_type::null_literal;
+  }
+};
+
+struct bool_literal : literal {
+  bool value;
+
+  inline bool_literal(bool _value) noexcept : value{_value} {}
+  inline constexpr ast_node_type type() const noexcept {
+    return ast_node_type::bool_literal;
+  }
+};
+
+template <typename number_type>
+struct number_literal : literal {
+  number_type number;
+
+  inline number_literal(number_type _number) : number{_number} {}
+  inline constexpr ast_node_type type() const noexcept {
+    return ast_node_type::number_literal;
+  }
+};
+
+struct string_literal : literal {
+  std::string string;
+
+  inline string_literal(std::string _string) : string{_string} {}
+  inline constexpr ast_node_type type() const noexcept {
+    return ast_node_type::string_literal;
+  }
+};
+
+struct raw_literal : literal {
+  std::string raw;
+
+  inline raw_literal(std::string _raw) : raw{_raw} {}
+  inline constexpr ast_node_type type() const noexcept {
+    return ast_node_type::raw_literal;
+  }
+};
+
+}  // namespace ast
+
+}  // namespace jscodegen
 
 #endif  // jscodegen_ast_hpp

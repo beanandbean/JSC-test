@@ -1,5 +1,7 @@
 {
   "files.associations": {
+    "SConscript": "python",
+    "SConstruct": "python",
     "iosfwd": "cpp",
     "cstddef": "cpp",
     "compare": "cpp",
@@ -57,6 +59,10 @@
     "utility": "cpp",
     "vector": "cpp",
     "iomanip": "cpp",
-    "unordered_map": "cpp"
+    "unordered_map": "cpp",
+    "__node_handle": "cpp",
+    "optional": "cpp",
+    "__hash_table": "cpp",
+    "__functional_base_03": "cpp"
   }
 }

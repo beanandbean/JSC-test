@@ -1,1 +1,1 @@
-# add_library(jsast)
+add_library(jscodegen generator.cpp)

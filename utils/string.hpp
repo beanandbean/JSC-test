@@ -6,11 +6,9 @@
 
 inline constexpr size_t utf8_length(const std::string& str) noexcept {
   size_t q = 0;
-  for (size_t i = 0; i < str.length(); i++, q++) {
+  for (size_t i = 0; i < str.size(); i++, q++) {
     const uint8_t c = str[i];
-    if (c >= 0 && c <= 127) {
-      i += 0;
-    } else if ((c & 0xE0) == 0xC0) {
+    if ((c & 0xE0) == 0xC0) {
       i += 1;
     } else if ((c & 0xF0) == 0xE0) {
       i += 2;
@@ -20,8 +18,6 @@ inline constexpr size_t utf8_length(const std::string& str) noexcept {
       i += 4;
     } else if ((c & 0xFE) == 0xFC) {
       i += 5;
-    } else {
-      return 0;  // invalid utf8
     }
   }
   return q;
@@ -30,7 +26,7 @@ inline constexpr size_t utf8_length(const std::string& str) noexcept {
 inline std::string quoted(const std::string& str) {
   std::ostringstream oss;
   oss << '"';
-  for (size_t i = 0; i < str.length(); i++) {
+  for (size_t i = 0; i < str.size(); i++) {
     const uint8_t c = str[i];
     switch (c) {
       case '\t':
