@@ -9,6 +9,4 @@
 #include "source_loc.hpp"
 #include "specs.hpp"
 
-#include "lazy_tree.inc.hpp"
-
 #endif  // jscodegen_hpp

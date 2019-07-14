@@ -16,60 +16,41 @@ struct lazy_tree {
 
   struct impl_base {
     virtual ~impl_base() {}
-
-    inline void write(generator& g) {
-      if (!_type.has_value()) {
-        build();
-      }
-      write_root(g);
-    }
-
-    inline ast_node_type type() {
-      if (!_type.has_value()) {
-        build();
-      }
-      return _type.value_or(ast_node_type::unexpected_node);
-    }
-
-   protected:
-    std::optional<ast_node_type> _type;
-
-    virtual void build() = 0;
-    virtual void write_root(generator& g) = 0;
+    virtual const ast::base& get_root() const = 0;
+    virtual void callback(source_range range) const = 0;
   };
 
   template <typename callback_type>
   struct optional_callback : impl_base {
    protected:
     inline optional_callback(callback_type callback) : _callback{callback} {}
-    inline void callback(source_range range) const { _callback(range); }
+    void callback(source_range range) const override { _callback(range); }
 
    private:
     callback_type _callback;
   };
 
-  template <typename ast_builder_type, typename callback_type>
+  template <
+      typename ast_builder_type, typename callback_type,
+      typename = std::enable_if_t<
+          std::is_invocable_v<ast_builder_type> &&
+          std::is_base_of_v<ast::base, std::result_of_t<ast_builder_type>>>>
   struct impl : optional_callback<callback_type> {
+    using root_type = std::result_of_t<ast_builder_type>;
+
     inline impl(ast_builder_type builder, callback_type callback)
         : optional_callback<callback_type>{callback}, _builder{builder} {}
 
-    void build() override;
-    void write_root(generator& g) override;
+    const ast::base& get_root() const override {
+      if (!_root.has_value()) {
+        _root = _builder();
+      }
+      return _root.value();
+    }
 
    private:
     ast_builder_type _builder;
-    std::optional<decltype(_builder())> _root;
-
-    template <typename root_type>
-    static inline constexpr ast_node_type extract_node_type(root_type& root) {
-      if constexpr (std::is_base_of_v<ast::base, root_type> ||
-                    std::is_same_v<lazy_tree, root_type>) {
-        return root.type();
-      } else {
-        // root is of sequential type
-        return ast_node_type::unexpected_node;
-      }
-    }
+    mutable std::optional<root_type> _root;
   };
 
   template <typename ast_builder_type>
@@ -82,8 +63,8 @@ struct lazy_tree {
       : _impl{std::make_unique<impl<ast_builder_type, callback_type>>(
             builder, callback)} {}
 
-  inline void write(generator& g) { _impl->write(g); }
-  inline ast_node_type type() { return _impl->type(); }
+  inline void write(generator& g) const { _impl->write(g); }
+  inline ast_node_type type() const { return _impl->type(); }
 
  private:
   std::unique_ptr<impl_base> _impl;
@@ -93,7 +74,7 @@ template <>
 struct lazy_tree::optional_callback<lazy_tree::empty_callback_tag> : impl_base {
  protected:
   inline optional_callback(empty_callback_tag) noexcept {}
-  inline void callback(source_range range) const noexcept {}
+  void callback(source_range range) const override {}
 };
 
 }  // namespace jscodegen
