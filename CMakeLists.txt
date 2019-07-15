@@ -7,10 +7,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 add_subdirectory(jsc)
-add_subdirectory(jscodegen)
+add_subdirectory(jsast)
 
 add_executable(jsc_test jsc_test.cpp)
 target_link_libraries(jsc_test jsc)
 
-add_executable(jscodegen_test jscodegen_test.cpp)
-target_link_libraries(jscodegen_test jscodegen)
+add_executable(jsast_test jsast_test.cpp)
+target_link_libraries(jsast_test jsast)

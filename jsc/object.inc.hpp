@@ -22,13 +22,13 @@ value object::callWithThisRef(JSObjectRef obj, arg_types... args) const {
                                             exception);
             })};
   } else {
-    const auto arg_map = [this](auto arg) {
+    const auto arg_map{[this](auto arg) {
       if constexpr (std::is_same_v<decltype(arg), value>) {
         return arg;
       } else {
         return _ctx.val(arg);
       }
-    };
+    }};
     std::array<value, parameter_pack_count<arg_types...>> arg_list{
         arg_map(args)...};
     std::array<JSValueRef, arg_list.size()> ref_list;

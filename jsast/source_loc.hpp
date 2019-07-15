@@ -1,9 +1,9 @@
-#ifndef jscodegen_source_loc_hpp
-#define jscodegen_source_loc_hpp
+#ifndef jsast_source_loc_hpp
+#define jsast_source_loc_hpp
 
 #include <cstddef>
 
-namespace jscodegen {
+namespace jsast {
 
 struct source_loc {
   size_t line;
@@ -61,6 +61,6 @@ struct source_range {
   }
 };
 
-}  // namespace jscodegen
+}  // namespace jsast
 
-#endif  // jscodegen_source_loc_hpp
+#endif  // jsast_source_loc_hpp

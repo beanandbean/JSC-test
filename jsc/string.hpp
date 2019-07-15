@@ -23,8 +23,8 @@ struct string_wrapper {
   }
 
   inline std::string get() const {
-    auto length = JSStringGetMaximumUTF8CStringSize(_ref);
-    auto buffer = std::make_unique<char[]>(length);
+    auto length{JSStringGetMaximumUTF8CStringSize(_ref)};
+    auto buffer{std::make_unique<char[]>(length)};
     JSStringGetUTF8CString(_ref, buffer.get(), length);
     return buffer.get();
   }

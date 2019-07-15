@@ -16,21 +16,19 @@ JSValueRef context::callback_class_call(JSContextRef ctx, JSObjectRef function,
                                         size_t argument_count,
                                         const JSValueRef arguments[],
                                         JSValueRef* exception) {
-  auto callback =
-      static_cast<internal_callback_type*>(JSObjectGetPrivate(function));
+  auto callback{static_cast<internal_callback_type*>(JSObjectGetPrivate(function))};
   return (*callback)(ctx, function, this_object, argument_count, arguments,
                      exception);
 }
 
 void context::callback_class_finalize(JSObjectRef function) {
-  auto callback =
-      static_cast<internal_callback_type*>(JSObjectGetPrivate(function));
+  auto callback{static_cast<internal_callback_type*>(JSObjectGetPrivate(function))};
   delete callback;
 }
 
 JSClassRef context::callback_class() {
   if (_callback_class == nullptr) {
-    JSClassDefinition def = kJSClassDefinitionEmpty;
+    JSClassDefinition def{kJSClassDefinitionEmpty};
     def.className = "NativeCallback";
     def.attributes = kJSClassAttributeNone;
     def.callAsFunction = callback_class_call;

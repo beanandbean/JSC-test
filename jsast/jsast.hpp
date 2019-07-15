@@ -1,12 +1,13 @@
 // JavaScript code generator based on project astring
 //   @ https://github.com/davidbonnet/astring
 
-#ifndef jscodegen_hpp
-#define jscodegen_hpp
+#ifndef jsast_hpp
+#define jsast_hpp
 
 #include "generator.hpp"
-#include "lazy_tree.hpp"
 #include "source_loc.hpp"
 #include "specs.hpp"
 
-#endif  // jscodegen_hpp
+#include "ast.inc.hpp"
+
+#endif  // jsast_hpp

@@ -4,30 +4,11 @@
 #include <sstream>
 #include <string>
 
-inline constexpr size_t utf8_length(const std::string& str) noexcept {
-  size_t q = 0;
-  for (size_t i = 0; i < str.size(); i++, q++) {
-    const uint8_t c = str[i];
-    if ((c & 0xE0) == 0xC0) {
-      i += 1;
-    } else if ((c & 0xF0) == 0xE0) {
-      i += 2;
-    } else if ((c & 0xF8) == 0xF0) {
-      i += 3;
-    } else if ((c & 0xFC) == 0xF8) {
-      i += 4;
-    } else if ((c & 0xFE) == 0xFC) {
-      i += 5;
-    }
-  }
-  return q;
-}
-
 inline std::string quoted(const std::string& str) {
   std::ostringstream oss;
   oss << '"';
-  for (size_t i = 0; i < str.size(); i++) {
-    const uint8_t c = str[i];
+  for (size_t i{0}; i < str.size(); i++) {
+    const auto c{static_cast<uint8_t>(str[i])};
     switch (c) {
       case '\t':
         oss << "\\t";
