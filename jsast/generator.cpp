@@ -73,10 +73,10 @@ void generator::write_binary_operand(const parent_type& parent,
                                      binary_operand_location loc) {
   if (binary_operand_need_parenthesis(parent, node, loc)) {
     write_raw("(");
-    write_node(node);
+    write(node);
     write_raw(")");
   } else {
-    write_node(node);
+    write(node);
   }
 }
 

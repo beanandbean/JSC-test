@@ -1,11 +1,9 @@
 #ifndef jsast_ast_hpp
 #define jsast_ast_hpp
 
-#include <memory>
 #include <string>
-#include <type_traits>
-#include <typeindex>
 
+#include "ast_node.hpp"
 #include "specs.hpp"
 
 namespace jsast {
@@ -83,52 +81,7 @@ enum class ast_node_type {
 enum class unary_op_location { prefix, suffix };
 enum class binary_operand_location { left, right };
 
-struct generator;
-
 namespace ast {
-
-struct base;
-
-struct node {
-  friend generator;
-
-  struct impl_base {
-    friend node;
-
-    virtual ~impl_base() noexcept {}
-    virtual const base& get() const = 0;
-    virtual std::type_index type() const = 0;
-
-   private:
-    virtual void write_to(generator& g) const = 0;
-  };
-
-  template <typename node_type,
-            typename = std::enable_if<std::is_base_of_v<base, node_type>>>
-  struct impl : impl_base {
-    inline impl(node_type&& node) : _node{std::move(node)} {}
-
-    const base& get() const override { return _node; }
-    std::type_index type() const override { return typeid(node_type); }
-    void write_to(generator& g) const override;
-
-   private:
-    node_type _node;
-  };
-
-  template <typename node_type>
-  inline node(node_type&& node)
-      : _impl{
-            std::make_unique<impl<node_type>>(std::forward<node_type>(node))} {}
-
-  inline const base& get() const { return _impl->get(); }
-  inline std::type_index type() const { return _impl->type(); }
-
- private:
-  std::unique_ptr<impl_base> _impl;
-
-  inline void write_to(generator& g) const { _impl->write_to(g); }
-};
 
 struct base {
   virtual ~base() noexcept {}
@@ -242,11 +195,6 @@ struct raw_literal : literal {
 };
 
 }  // namespace ast
-
-template <typename node_type>
-inline bool node_is(const ast::node& node) {
-  return node.type() == std::type_index{typeid(node_type)};
-}
 
 }  // namespace jsast
 
