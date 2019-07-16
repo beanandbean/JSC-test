@@ -27,9 +27,10 @@ inline size_t precedence_for_type(std::type_index node) noexcept {
       {typeid(ast::super), 20},
       // {typeid(ast::sequence_expression), 20},
       // Operations
-      // {typeid(ast::member_expression), 19},
-      // {typeid(ast::call_expression), 19},
-      // {typeid(ast::new_expression), 19},
+      {typeid(ast::member_expression), 19},
+      {typeid(ast::computed_member_expression), 19},
+      {typeid(ast::call_expression), 19},
+      {typeid(ast::new_expression), 19},
       // Other definitions
       // {typeid(ast::arrow_function_expression), precedence_needs_parentheses},
       // {typeid(ast::class_expression), precedence_needs_parentheses},
@@ -40,12 +41,12 @@ inline size_t precedence_for_type(std::type_index node) noexcept {
       {typeid(ast::unary_expression), 15},
       {typeid(ast::binary_expression), 14},
       {typeid(ast::logical_expression), 13},
-      // {typeid(ast::conditional_expression), 4},
+      {typeid(ast::conditional_expression), 4},
       {typeid(ast::assignment_expression), 3},
-      // {typeid(ast::await_expression), 2},
+      {typeid(ast::await_expression), 2},
       // {typeid(ast::yield_expression), 2},
-      // {typeid(ast::rest_element), 1}
-  };
+      // {typeid(ast::delegate_yield_expression), 2},
+      {typeid(ast::rest_element), 1}};
   return precedence_map[node];
 }
 

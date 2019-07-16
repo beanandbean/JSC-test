@@ -30,7 +30,7 @@ void generator::write_raw(std::string str) {
 }
 
 template <typename parent_type, typename node_type>
-inline bool binary_operand_need_parenthesis_by_operator(
+inline bool binary_operand_needs_parenthesis_by_operator(
     const parent_type& parent, const node_type& node,
     binary_operand_location loc) {
   switch (loc) {
@@ -42,14 +42,13 @@ inline bool binary_operand_need_parenthesis_by_operator(
 }
 
 template <typename parent_type>
-inline bool binary_operand_need_parenthesis(const parent_type& parent,
-                                            const ast::node& node,
-                                            binary_operand_location loc) {
+inline bool binary_operand_needs_parenthesis(const parent_type& parent,
+                                             const ast::node& node,
+                                             binary_operand_location loc) {
   const auto node_precedence{precedence_for(node)};
   if (node_precedence == precedence_needs_parentheses) {
     return true;
-  }
-  if (node_precedence != precedence<parent_type>) {
+  } else if (node_precedence != precedence<parent_type>) {
     return node_precedence < precedence<parent_type>;
   } else if (node_is<ast::binary_expression>(node)) {
     auto& binary{static_cast<const ast::binary_expression&>(node.get())};
@@ -58,10 +57,10 @@ inline bool binary_operand_need_parenthesis(const parent_type& parent,
         return loc != binary_operand_location::right;
       }
     }
-    return binary_operand_need_parenthesis_by_operator(parent, binary, loc);
+    return binary_operand_needs_parenthesis_by_operator(parent, binary, loc);
   } else if (node_is<ast::logical_expression>(node)) {
     auto& logical{static_cast<const ast::logical_expression&>(node.get())};
-    return binary_operand_need_parenthesis_by_operator(parent, logical, loc);
+    return binary_operand_needs_parenthesis_by_operator(parent, logical, loc);
   } else {
     return false;
   }
@@ -71,12 +70,12 @@ template <typename parent_type>
 void generator::write_binary_operand(const parent_type& parent,
                                      const ast::node& node,
                                      binary_operand_location loc) {
-  if (binary_operand_need_parenthesis(parent, node, loc)) {
+  if (binary_operand_needs_parenthesis(parent, node, loc)) {
     write_raw("(");
-    write(node);
+    write_node(node);
     write_raw(")");
   } else {
-    write(node);
+    write_node(node);
   }
 }
 

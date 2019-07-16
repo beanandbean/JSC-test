@@ -1,81 +1,14 @@
 #ifndef jsast_ast_hpp
 #define jsast_ast_hpp
 
+#include <optional>
 #include <string>
 
 #include "ast_node.hpp"
+#include "node_vector.hpp"
 #include "specs.hpp"
 
 namespace jsast {
-
-// Reference only
-enum class ast_node_type {
-  unexpected_node /* should never occur! */,
-  program,
-  super,
-  block_statement,
-  class_body,
-  empty_statement,
-  expression_statement,
-  if_statement,
-  labeled_statement,
-  break_statement,
-  continue_statement,
-  with_statement,
-  switch_statement,
-  return_statement,
-  throw_statement,
-  try_statement,
-  while_statement,
-  do_while_statement,
-  for_statement,
-  for_in_statement,
-  for_of_statement,
-  debugger_statement,
-  function_declaration,
-  function_expression,
-  variable_declaration,
-  variable_declarator,
-  class_declaration,
-  import_declaration,
-  export_default_declaration,
-  export_named_declaration,
-  export_all_declaration,
-  method_definition,
-  class_expression,
-  arrow_function_expression,
-  this_expression,
-  rest_element,
-  spread_element,
-  yield_expression,
-  await_expression,
-  template_literal,
-  tagged_template_expression,
-  array_expression,
-  array_pattern,
-  object_expression,
-  property,
-  object_pattern,
-  sequence_expression,
-  unary_expression,
-  update_expression,
-  assignment_expression,
-  assignment_pattern,
-  binary_expression,
-  logical_expression,
-  conditional_expression,
-  new_expression,
-  call_expression,
-  member_expression,
-  meta_property,
-  identifier,
-  null_literal,
-  bool_literal,
-  number_literal,
-  string_literal,
-  reg_exp_literal,
-  raw_literal,
-};
 
 // Useful ast-related tags
 enum class unary_op_location { prefix, suffix };
@@ -84,9 +17,6 @@ enum class binary_operand_location { left, right };
 namespace ast {
 
 struct base {
-  virtual ~base() noexcept {}
-
- protected:
   inline base() noexcept {}
 };
 
@@ -94,8 +24,66 @@ struct super : base {
   using base::base;
 };
 
-struct expression : base {
+struct statement : base {
  protected:
+  using base::base;
+};
+
+struct empty_statement : statement {
+  using statement::statement;
+};
+
+struct expression_statement : statement {
+  node expression;
+
+  inline expression_statement(node&& _expression)
+      : expression{std::move(_expression)} {}
+};
+
+struct labeled_statement : statement {
+  node label;
+  node body;
+
+  inline labeled_statement(node&& _label, node&& _body)
+      : label{std::move(_label)}, body{std::move(_body)} {}
+};
+
+struct break_statement : statement {
+  std::optional<node> label;
+
+  inline break_statement() noexcept {}
+  inline break_statement(node&& _label) : label{std::move(_label)} {}
+};
+
+struct continue_statement : statement {
+  std::optional<node> label;
+
+  inline continue_statement() noexcept {}
+  inline continue_statement(node&& _label) : label{std::move(_label)} {}
+};
+
+struct with_statement : statement {
+  node object;
+  node body;
+
+  inline with_statement(node&& _object, node&& _body)
+      : object{std::move(_object)}, body{std::move(_body)} {}
+};
+
+struct return_statement : statement {
+  std::optional<node> argument;
+
+  inline return_statement() noexcept {}
+  inline return_statement(node&& _argument) : argument{std::move(_argument)} {}
+};
+
+struct throw_statement : statement {
+  node argument;
+
+  inline throw_statement(node&& _argument) : argument{std::move(_argument)} {}
+};
+
+struct expression : base {
   using base::base;
 };
 
@@ -125,6 +113,9 @@ struct assignment_expression : expression {
   assignment_op op;
   node right;
 
+  inline assignment_expression(node&& _left, node&& _right)
+      : assignment_expression{std::move(_left), assignment_op::standard,
+                              std::move(_right)} {}
   inline assignment_expression(node&& _left, assignment_op _op, node&& _right)
       : left{std::move(_left)}, op{_op}, right{std::move(_right)} {}
 };
@@ -148,9 +139,72 @@ struct logical_expression : expression {
       : left{std::move(_left)}, op{_op}, right{std::move(_right)} {}
 };
 
+struct conditional_expression : expression {
+  node test;
+  node consequent;
+  node alternate;
+
+  inline conditional_expression(node&& _test, node&& _consequent,
+                                node&& _alternate)
+      : test{std::move(_test)},
+        consequent{std::move(_consequent)},
+        alternate{std::move(_alternate)} {}
+};
+
+struct base_call_expression : expression {
+  node callee;
+  node_vector arguments;
+
+  inline base_call_expression(node&& _callee, node_vector&& _arguments)
+      : callee{std::move(_callee)}, arguments{std::move(_arguments)} {}
+};
+
+struct call_expression : base_call_expression {
+  using base_call_expression::base_call_expression;
+};
+
+struct new_expression : base_call_expression {
+  using base_call_expression::base_call_expression;
+};
+
+struct member_expression : expression {
+  node object;
+  std::string property;
+
+  inline member_expression(node&& _object, std::string _property)
+      : object{std::move(_object)}, property{_property} {}
+};
+
+struct computed_member_expression : expression {
+  node object;
+  node property;
+
+  inline computed_member_expression(node&& _object, node&& _property)
+      : object{std::move(_object)}, property{std::move(_property)} {}
+};
+
+struct yield_expression : expression {
+  std::optional<node> argument;
+
+  inline yield_expression() noexcept {}
+  inline yield_expression(node&& _argument) : argument{std::move(_argument)} {}
+};
+
+struct delegate_yield_expression : expression {
+  node argument;
+
+  inline delegate_yield_expression(node&& _argument)
+      : argument{std::move(_argument)} {}
+};
+
+struct await_expression : expression {
+  node argument;
+
+  inline await_expression(node&& _argument) : argument{std::move(_argument)} {}
+};
+
 struct pattern : base {
- protected:
-  inline pattern() noexcept {}
+  using base::base;
 };
 
 struct identifier : pattern {
@@ -159,13 +213,32 @@ struct identifier : pattern {
   inline identifier(std::string _name) : name{_name} {}
 };
 
+struct assignment_pattern : pattern {
+  node left;
+  node right;
+
+  inline assignment_pattern(node&& _left, node&& _right)
+      : left{std::move(_left)}, right{std::move(_right)} {}
+};
+
+struct rest_element : pattern {
+  node argument;
+
+  inline rest_element(node&& _argument) : argument{std::move(_argument)} {}
+};
+
+struct spread_element : base {
+  node argument;
+
+  inline spread_element(node&& _argument) : argument{std::move(_argument)} {}
+};
+
 struct literal : expression {
- protected:
-  inline literal() noexcept {}
+  using expression::expression;
 };
 
 struct null_literal : literal {
-  inline null_literal() noexcept {}
+  using literal::literal;
 };
 
 struct bool_literal : literal {
