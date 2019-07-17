@@ -14,9 +14,9 @@ inline void object::set_property(property_type prop, val_type val) const {
   set_property(prop, _ctx.val(val));
 }
 
-template <typename... arg_types>
-value object::callWithThisRef(JSObjectRef obj, arg_types... args) const {
-  if constexpr (parameter_pack_count<arg_types...> == 0) {
+template <typename... arg_type>
+value object::callWithThisRef(JSObjectRef obj, arg_type... args) const {
+  if constexpr (parameter_pack_count<arg_type...> == 0) {
     return {_ctx, _ctx.try_throwable([this, &obj](auto exception) {
               return JSObjectCallAsFunction(_ctx._ref, _ref, obj, 0, nullptr,
                                             exception);
@@ -29,7 +29,7 @@ value object::callWithThisRef(JSObjectRef obj, arg_types... args) const {
         return _ctx.val(arg);
       }
     }};
-    std::array<value, parameter_pack_count<arg_types...>> arg_list{
+    std::array<value, parameter_pack_count<arg_type...>> arg_list{
         arg_map(args)...};
     std::array<JSValueRef, arg_list.size()> ref_list;
     std::transform(arg_list.begin(), arg_list.end(), ref_list.begin(),

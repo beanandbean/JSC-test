@@ -160,6 +160,19 @@ inline std::string symbol_for(update_op op) noexcept {
   return symbol_map[op];
 }
 
+enum class variable_declaration_type { var, let, constant };
+
+inline std::string symbol_for(variable_declaration_type type) noexcept {
+  static std::unordered_map<variable_declaration_type, std::string> symbol_map{
+      {variable_declaration_type::var, "var"},
+      {variable_declaration_type::let, "let"},
+      {variable_declaration_type::constant, "const"}};
+  return symbol_map[type];
+}
+
+enum class unary_op_location { prefix, suffix };
+enum class binary_operand_location { left, right };
+
 }  // namespace jsast
 
 #endif  // jsast_specs_hpp

@@ -29,12 +29,12 @@ struct object {
 
   bool is_function() const;
 
-  template <typename... arg_types>
-  inline value call(arg_types... args) const {
+  template <typename... arg_type>
+  inline value call(arg_type... args) const {
     return callWithThisRef(nullptr, args...);
   }
-  template <typename... arg_types>
-  inline value callWithThis(object obj, arg_types... args) const {
+  template <typename... arg_type>
+  inline value callWithThis(object obj, arg_type... args) const {
     return callWithThisRef(obj._ref, args...);
   }
 
@@ -63,8 +63,8 @@ struct object {
             typename = std::enable_if_t<!std::is_same_v<val_type, value>>>
   inline void set_property(property_type prop, val_type val) const;
 
-  template <typename... arg_types>
-  value callWithThisRef(JSObjectRef obj, arg_types... args) const;
+  template <typename... arg_type>
+  value callWithThisRef(JSObjectRef obj, arg_type... args) const;
 };
 
 }  // namespace jsc

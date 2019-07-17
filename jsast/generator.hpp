@@ -62,10 +62,28 @@ struct generator {
 
   inline void write_node(const ast::super&) { write_elems("super"); }
 
+  inline void write_node(const ast::variable_declarator& declarator) {
+    write_elems(declarator.id);
+    if (declarator.init.has_value()) {
+      write_elems(" = ", declarator.init.value());
+    }
+  }
+
   inline void write_node(const ast::empty_statement&) { write_elems(";"); }
+
+  inline void write_node(const ast::block_statement& statement) {
+    write_block(statement.body);
+  }
 
   inline void write_node(const ast::expression_statement& statement) {
     write_elems(statement.expression, ";");
+  }
+
+  inline void write_node(const ast::if_statement& statement) {
+    write_elems("if (", statement.test, ") ", statement.consequent);
+    if (statement.alternate.has_value()) {
+      write_elems(" else ", statement.alternate.value());
+    }
   }
 
   inline void write_node(const ast::labeled_statement& statement) {
@@ -89,14 +107,39 @@ struct generator {
     if (statement.argument.has_value()) {
       write_elems(" ", statement.argument.value());
     }
-    write_raw(";");
+    write_elems(";");
   }
 
   inline void write_node(const ast::throw_statement& statement) {
     write_elems("throw ", statement.argument, ";");
   }
 
+  inline void write_node(const ast::while_statement& statement) {
+    write_elems("while (", statement.test, ") ", statement.body);
+  }
+
+  inline void write_node(const ast::do_while_statement& statement) {
+    write_elems("do", statement.body, " while (", statement.test, ");");
+  }
+
+  inline void write_node(const ast::debugger_statement&) {
+    write_elems("debugger;");
+  }
+
+  inline void write_node(const ast::variable_declaration& declaration) {
+    write_variable_declaration(declaration);
+    write_elems(";");
+  }
+
   inline void write_node(const ast::this_expression&) { write_raw("this"); }
+
+  inline void write_node(const ast::array_expression& array) {
+    write_array(array.elements);
+  }
+
+  inline void write_node(const ast::sequence_expression& sequence) {
+    write_sequence(sequence.expressions);
+  }
 
   inline void write_node(const ast::unary_expression& unary) {
     const auto op_symbol{symbol_for(unary.op)};
@@ -245,6 +288,10 @@ struct generator {
     write_elems(identifier.name);
   }
 
+  inline void write_node(const ast::array_pattern& array) {
+    write_array(array.elements);
+  }
+
   inline void write_node(const ast::assignment_pattern& assignment) {
     write_elems(assignment.left, " = ", assignment.right);
   }
@@ -282,6 +329,31 @@ struct generator {
     write_line_end();
   }
 
+  inline void write_block(const move_vector<ast::node>& body) {
+    write_elems("{");
+    if (body.size() > 0) {
+      write_line_end();
+      _indent_level++;
+      for (const auto& statement : body) {
+        write_statement(statement);
+      }
+      _indent_level--;
+      write_indent();
+    }
+    write_elems("}");
+  }
+
+  inline void write_variable_declaration(
+      const ast::variable_declaration& declaration) {
+    write_elems(symbol_for(declaration.kind), " ");
+    if (declaration.declarations.size() > 0) {
+      write_elems(declaration.declarations[0]);
+      for (size_t i{1}; i < declaration.declarations.size(); i++) {
+        write_elems(", ", declaration.declarations[i]);
+      }
+    }
+  }
+
   template <typename node_type>
   inline void write_control_interrupt(const node_type& node, std::string name) {
     write_elems(name);
@@ -291,7 +363,7 @@ struct generator {
     write_elems(";");
   }
 
-  inline void write_sequence(const node_vector& nodes) {
+  inline void write_sequence(const move_vector<ast::node>& nodes) {
     write_elems("(");
     if (nodes.size() > 0) {
       write_elems(nodes[0]);
@@ -300,6 +372,24 @@ struct generator {
       }
     }
     write_elems(")");
+  }
+
+  inline void write_array(const move_vector<std::optional<ast::node>>& nodes) {
+    write_elems("[");
+    const size_t length{nodes.size()};
+    if (length > 0) {
+      for (size_t i{0}; i < length; i++) {
+        if (nodes[i].has_value()) {
+          write_elems(nodes[i].value());
+          if (i < length - 1) {
+            write_elems(", ");
+          }
+        } else {
+          write_elems(", ");
+        }
+      }
+    }
+    write_elems("]");
   }
 
   template <typename node_type>
@@ -320,7 +410,7 @@ struct generator {
   }
 
   void write_raw(std::string str);
-};
+};  // namespace jsast
 
 }  // namespace jsast
 

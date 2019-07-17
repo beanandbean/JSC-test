@@ -4,15 +4,11 @@
 #include <optional>
 #include <string>
 
+#include "../utils/move_vector.hpp"
 #include "ast_node.hpp"
-#include "node_vector.hpp"
 #include "specs.hpp"
 
 namespace jsast {
-
-// Useful ast-related tags
-enum class unary_op_location { prefix, suffix };
-enum class binary_operand_location { left, right };
 
 namespace ast {
 
@@ -24,8 +20,16 @@ struct super : base {
   using base::base;
 };
 
+struct variable_declarator : base {
+  node id;
+  std::optional<node> init;
+
+  explicit inline variable_declarator(
+      node&& _id, std::optional<node>&& _init = std::nullopt)
+      : id{std::move(_id)}, init{std::move(_init)} {}
+};
+
 struct statement : base {
- protected:
   using base::base;
 };
 
@@ -33,11 +37,30 @@ struct empty_statement : statement {
   using statement::statement;
 };
 
+struct block_statement : statement {
+  move_vector<node> body;
+
+  explicit inline block_statement(move_vector<node>&& _body)
+      : body{std::move(_body)} {}
+};
+
 struct expression_statement : statement {
   node expression;
 
   explicit inline expression_statement(node&& _expression)
       : expression{std::move(_expression)} {}
+};
+
+struct if_statement : statement {
+  node test;
+  node consequent;
+  std::optional<node> alternate;
+
+  explicit inline if_statement(node&& _test, node&& _consequent,
+                               std::optional<node>&& _alternate = std::nullopt)
+      : test{std::move(_test)},
+        consequent{std::move(_consequent)},
+        alternate{std::move(_alternate)} {}
 };
 
 struct labeled_statement : statement {
@@ -51,15 +74,15 @@ struct labeled_statement : statement {
 struct break_statement : statement {
   std::optional<node> label;
 
-  explicit inline break_statement() noexcept {}
-  explicit inline break_statement(node&& _label) : label{std::move(_label)} {}
+  explicit inline break_statement(std::optional<node>&& _label = std::nullopt)
+      : label{std::move(_label)} {}
 };
 
 struct continue_statement : statement {
   std::optional<node> label;
 
-  explicit inline continue_statement() noexcept {}
-  explicit inline continue_statement(node&& _label)
+  explicit inline continue_statement(
+      std::optional<node>&& _label = std::nullopt)
       : label{std::move(_label)} {}
 };
 
@@ -74,8 +97,8 @@ struct with_statement : statement {
 struct return_statement : statement {
   std::optional<node> argument;
 
-  explicit inline return_statement() noexcept {}
-  explicit inline return_statement(node&& _argument)
+  explicit inline return_statement(
+      std::optional<node>&& _argument = std::nullopt)
       : argument{std::move(_argument)} {}
 };
 
@@ -86,12 +109,59 @@ struct throw_statement : statement {
       : argument{std::move(_argument)} {}
 };
 
+struct while_statement : statement {
+  node test;
+  node body;
+
+  explicit inline while_statement(node&& _test, node&& _body)
+      : test{std::move(_test)}, body{std::move(_body)} {}
+};
+
+struct do_while_statement : statement {
+  node test;
+  node body;
+
+  explicit inline do_while_statement(node&& _test, node&& _body)
+      : test{std::move(_test)}, body{std::move(_body)} {}
+};
+
+struct debugger_statement : statement {
+  using statement::statement;
+};
+
+struct declaration : statement {
+  using statement::statement;
+};
+
+struct variable_declaration : declaration {
+  move_vector<node> declarations;
+  variable_declaration_type kind;
+
+  explicit inline variable_declaration(move_vector<node>&& _declarations,
+                                       variable_declaration_type _kind)
+      : declarations{std::move(_declarations)}, kind{_kind} {}
+};
+
 struct expression : base {
   using base::base;
 };
 
 struct this_expression : expression {
   using expression::expression;
+};
+
+struct array_expression : expression {
+  move_vector<std::optional<node>> elements;
+
+  explicit inline array_expression(move_vector<std::optional<node>>&& _elements)
+      : elements{std::move(_elements)} {}
+};
+
+struct sequence_expression : expression {
+  move_vector<node> expressions;
+
+  explicit inline sequence_expression(move_vector<node>&& _expressions)
+      : expressions{std::move(_expressions)} {}
 };
 
 struct unary_expression : expression {
@@ -158,9 +228,10 @@ struct conditional_expression : expression {
 
 struct base_call_expression : expression {
   node callee;
-  node_vector arguments;
+  move_vector<node> arguments;
 
-  explicit inline base_call_expression(node&& _callee, node_vector&& _arguments)
+  explicit inline base_call_expression(node&& _callee,
+                                       move_vector<node>&& _arguments)
       : callee{std::move(_callee)}, arguments{std::move(_arguments)} {}
 };
 
@@ -191,8 +262,8 @@ struct computed_member_expression : expression {
 struct yield_expression : expression {
   std::optional<node> argument;
 
-  explicit inline yield_expression() noexcept {}
-  explicit inline yield_expression(node&& _argument)
+  explicit inline yield_expression(
+      std::optional<node>&& _argument = std::nullopt)
       : argument{std::move(_argument)} {}
 };
 
@@ -226,6 +297,13 @@ struct identifier : pattern {
   std::string name;
 
   explicit inline identifier(std::string _name) : name{_name} {}
+};
+
+struct array_pattern : pattern {
+  move_vector<std::optional<node>> elements;
+
+  explicit inline array_pattern(move_vector<std::optional<node>>&& _elements)
+      : elements{std::move(_elements)} {}
 };
 
 struct assignment_pattern : pattern {

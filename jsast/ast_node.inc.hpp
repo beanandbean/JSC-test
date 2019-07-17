@@ -5,13 +5,13 @@ namespace jsast::ast {
 
 template <typename node_type, typename enabled>
 void node::impl<node_type, enabled>::write_to(generator& g) const {
-  g.write_node(_node);
+  g.write_elems(_node);
 }
 
 template <typename node_type, typename callback_type, typename enabled>
 void node::impl_with_callback<node_type, callback_type, enabled>::write_to(
     generator& g) const {
-  _callback(g.with_range([this, &g]() { g.write_node(this->_node); }));
+  _callback(g.with_range([this, &g]() { g.write_elems(this->_node); }));
 }
 
 }  // namespace jsast::ast

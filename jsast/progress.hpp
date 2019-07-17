@@ -8,39 +8,39 @@ enum class ast_node_type {
   assignment_property,
   switch_case,
   catch_clause,
-  variable_declarator,
+  variable_declarator,  // √
   method_definition,
-  empty_statement,  // √
-  block_statement,
+  empty_statement,       // √
+  block_statement,       // √
   expression_statement,  // √
-  if_statement,
-  labeled_statement,   // √
-  break_statement,     // √
-  continue_statement,  // √
-  with_statement,      // √
+  if_statement,          // √
+  labeled_statement,     // √
+  break_statement,       // √
+  continue_statement,    // √
+  with_statement,        // √
   switch_statement,
   return_statement,  // √
-  throw_statement,
+  throw_statement,   // √
   try_statement,
-  while_statement,
-  do_while_statement,
+  while_statement,     // √
+  do_while_statement,  // √
   for_statement,
   for_in_statement,
   for_of_statement,
-  debugger_statement,
-  variable_declaration,
+  debugger_statement,    // √
+  variable_declaration,  // √
   function_declaration,
   class_declaration,
   import_declaration,
   export_default_declaration,
   export_named_declaration,
   export_all_declaration,
-  this_expression,  // √
-  array_expression,
+  this_expression,   // √
+  array_expression,  // √
   object_expression,
   function_expression,
   arrow_function_expression,
-  sequence_expression,
+  sequence_expression,         // √
   unary_expression,            // √
   binary_expression,           // √
   assignment_expression,       // √
@@ -57,10 +57,10 @@ enum class ast_node_type {
   class_expression,
   template_literal,
   tagged_template_expression,
-  meta_property,
-  identifier,  // √
+  meta_property,  // √
+  identifier,     // √
+  array_pattern,  // √
   object_pattern,
-  array_pattern,
   assignment_pattern,  // √
   rest_element,        // √
   spread_element,      // √
