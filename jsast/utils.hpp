@@ -1,8 +1,27 @@
-#ifndef utils_string_hpp
-#define utils_string_hpp
+#ifndef jsast_utils_hpp
+#define jsast_utils_hpp
 
 #include <sstream>
 #include <string>
+#include <vector>
+
+namespace jsast::utils {
+
+template <typename elem_type>
+struct move_vector : std::vector<elem_type> {
+  template <typename... arg_type>
+  move_vector(arg_type&&... args) {
+    push_all(std::forward<arg_type>(args)...);
+  }
+
+ private:
+  inline void push_all() noexcept {}
+  template <typename... arg_type>
+  inline void push_all(elem_type&& n, arg_type&&... args) {
+    this->push_back(std::move(n));
+    push_all(std::forward<arg_type>(args)...);
+  }
+};
 
 inline std::string quoted(const std::string& str) {
   std::ostringstream oss;
@@ -46,4 +65,6 @@ inline std::string quoted(const std::string& str) {
   return oss.str();
 }
 
-#endif  // utils_string_hpp
+}  // namespace jsast::utils
+
+#endif  // jsast_utils_hpp

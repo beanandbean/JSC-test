@@ -4,9 +4,9 @@
 #include <optional>
 #include <string>
 
-#include "../utils/move_vector.hpp"
 #include "ast_node.hpp"
 #include "specs.hpp"
+#include "utils.hpp"
 
 namespace jsast {
 
@@ -38,9 +38,9 @@ struct empty_statement : statement {
 };
 
 struct block_statement : statement {
-  move_vector<node> body;
+  utils::move_vector<node> body;
 
-  explicit inline block_statement(move_vector<node>&& _body)
+  explicit inline block_statement(utils::move_vector<node>&& _body)
       : body{std::move(_body)} {}
 };
 
@@ -134,10 +134,10 @@ struct declaration : statement {
 };
 
 struct variable_declaration : declaration {
-  move_vector<node> declarations;
+  utils::move_vector<node> declarations;
   variable_declaration_type kind;
 
-  explicit inline variable_declaration(move_vector<node>&& _declarations,
+  explicit inline variable_declaration(utils::move_vector<node>&& _declarations,
                                        variable_declaration_type _kind)
       : declarations{std::move(_declarations)}, kind{_kind} {}
 };
@@ -151,16 +151,17 @@ struct this_expression : expression {
 };
 
 struct array_expression : expression {
-  move_vector<std::optional<node>> elements;
+  utils::move_vector<std::optional<node>> elements;
 
-  explicit inline array_expression(move_vector<std::optional<node>>&& _elements)
+  explicit inline array_expression(
+      utils::move_vector<std::optional<node>>&& _elements)
       : elements{std::move(_elements)} {}
 };
 
 struct sequence_expression : expression {
-  move_vector<node> expressions;
+  utils::move_vector<node> expressions;
 
-  explicit inline sequence_expression(move_vector<node>&& _expressions)
+  explicit inline sequence_expression(utils::move_vector<node>&& _expressions)
       : expressions{std::move(_expressions)} {}
 };
 
@@ -228,10 +229,10 @@ struct conditional_expression : expression {
 
 struct base_call_expression : expression {
   node callee;
-  move_vector<node> arguments;
+  utils::move_vector<node> arguments;
 
   explicit inline base_call_expression(node&& _callee,
-                                       move_vector<node>&& _arguments)
+                                       utils::move_vector<node>&& _arguments)
       : callee{std::move(_callee)}, arguments{std::move(_arguments)} {}
 };
 
@@ -300,9 +301,10 @@ struct identifier : pattern {
 };
 
 struct array_pattern : pattern {
-  move_vector<std::optional<node>> elements;
+  utils::move_vector<std::optional<node>> elements;
 
-  explicit inline array_pattern(move_vector<std::optional<node>>&& _elements)
+  explicit inline array_pattern(
+      utils::move_vector<std::optional<node>>&& _elements)
       : elements{std::move(_elements)} {}
 };
 

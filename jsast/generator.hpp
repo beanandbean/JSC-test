@@ -4,10 +4,10 @@
 #include <sstream>
 #include <type_traits>
 
-#include "../utils/string.hpp"
 #include "ast.hpp"
 #include "ast_specs.hpp"
 #include "source_loc.hpp"
+#include "utils.hpp"
 
 namespace jsast {
 
@@ -252,7 +252,7 @@ struct generator {
     if (is_identifier) {
       write_elems(".", member.property);
     } else {
-      write_elems("[", quoted(member.property), "]");
+      write_elems("[", utils::quoted(member.property), "]");
     }
   }
 
@@ -315,7 +315,7 @@ struct generator {
   }
 
   inline void write_node(const ast::string_literal& literal) {
-    write_elems(quoted(literal.string));
+    write_elems(utils::quoted(literal.string));
   }
 
   inline void write_node(const ast::raw_literal& literal) {
@@ -329,7 +329,7 @@ struct generator {
     write_line_end();
   }
 
-  inline void write_block(const move_vector<ast::node>& body) {
+  inline void write_block(const utils::move_vector<ast::node>& body) {
     write_elems("{");
     if (body.size() > 0) {
       write_line_end();
@@ -363,7 +363,7 @@ struct generator {
     write_elems(";");
   }
 
-  inline void write_sequence(const move_vector<ast::node>& nodes) {
+  inline void write_sequence(const utils::move_vector<ast::node>& nodes) {
     write_elems("(");
     if (nodes.size() > 0) {
       write_elems(nodes[0]);
@@ -374,7 +374,8 @@ struct generator {
     write_elems(")");
   }
 
-  inline void write_array(const move_vector<std::optional<ast::node>>& nodes) {
+  inline void write_array(
+      const utils::move_vector<std::optional<ast::node>>& nodes) {
     write_elems("[");
     const size_t length{nodes.size()};
     if (length > 0) {
