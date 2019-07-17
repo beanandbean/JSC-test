@@ -71,11 +71,9 @@ void generator::write_binary_operand(const parent_type& parent,
                                      const ast::node& node,
                                      binary_operand_location loc) {
   if (binary_operand_needs_parenthesis(parent, node, loc)) {
-    write_raw("(");
-    write_node(node);
-    write_raw(")");
+    write_elems("(", node, ")");
   } else {
-    write_node(node);
+    write_elems(node);
   }
 }
 

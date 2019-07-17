@@ -27,7 +27,7 @@ struct node {
   };
 
   template <typename node_type,
-            typename = std::enable_if<std::is_base_of_v<base, node_type>>>
+            typename = std::enable_if_t<std::is_base_of_v<base, node_type>>>
   struct impl : impl_base {
     inline impl(node_type&& node) : _node{std::forward<node_type>(node)} {}
 
@@ -40,7 +40,7 @@ struct node {
   };
 
   template <typename node_type, typename callback_type,
-            typename = std::enable_if<std::is_base_of_v<base, node_type>>>
+            typename = std::enable_if_t<std::is_base_of_v<base, node_type>>>
   struct impl_with_callback : impl<node_type> {
     inline impl_with_callback(node_type&& node, callback_type callback)
         : impl<node_type>{std::forward<node_type>(node)}, _callback{callback} {}
@@ -51,12 +51,14 @@ struct node {
     callback_type _callback;
   };
 
-  template <typename node_type>
+  template <typename node_type,
+            typename = std::enable_if_t<std::is_base_of_v<base, node_type>>>
   inline node(node_type&& node)
       : _impl{
             std::make_unique<impl<node_type>>(std::forward<node_type>(node))} {}
 
-  template <typename node_type, typename callback_type>
+  template <typename node_type, typename callback_type,
+            typename = std::enable_if_t<std::is_base_of_v<base, node_type>>>
   inline node(node_type&& node, callback_type callback)
       : _impl{std::make_unique<impl_with_callback<node_type, callback_type>>(
             std::forward<node_type>(node), callback)} {}

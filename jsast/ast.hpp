@@ -17,7 +17,7 @@ enum class binary_operand_location { left, right };
 namespace ast {
 
 struct base {
-  inline base() noexcept {}
+  explicit inline base() noexcept {}
 };
 
 struct super : base {
@@ -36,7 +36,7 @@ struct empty_statement : statement {
 struct expression_statement : statement {
   node expression;
 
-  inline expression_statement(node&& _expression)
+  explicit inline expression_statement(node&& _expression)
       : expression{std::move(_expression)} {}
 };
 
@@ -44,43 +44,46 @@ struct labeled_statement : statement {
   node label;
   node body;
 
-  inline labeled_statement(node&& _label, node&& _body)
+  explicit inline labeled_statement(node&& _label, node&& _body)
       : label{std::move(_label)}, body{std::move(_body)} {}
 };
 
 struct break_statement : statement {
   std::optional<node> label;
 
-  inline break_statement() noexcept {}
-  inline break_statement(node&& _label) : label{std::move(_label)} {}
+  explicit inline break_statement() noexcept {}
+  explicit inline break_statement(node&& _label) : label{std::move(_label)} {}
 };
 
 struct continue_statement : statement {
   std::optional<node> label;
 
-  inline continue_statement() noexcept {}
-  inline continue_statement(node&& _label) : label{std::move(_label)} {}
+  explicit inline continue_statement() noexcept {}
+  explicit inline continue_statement(node&& _label)
+      : label{std::move(_label)} {}
 };
 
 struct with_statement : statement {
   node object;
   node body;
 
-  inline with_statement(node&& _object, node&& _body)
+  explicit inline with_statement(node&& _object, node&& _body)
       : object{std::move(_object)}, body{std::move(_body)} {}
 };
 
 struct return_statement : statement {
   std::optional<node> argument;
 
-  inline return_statement() noexcept {}
-  inline return_statement(node&& _argument) : argument{std::move(_argument)} {}
+  explicit inline return_statement() noexcept {}
+  explicit inline return_statement(node&& _argument)
+      : argument{std::move(_argument)} {}
 };
 
 struct throw_statement : statement {
   node argument;
 
-  inline throw_statement(node&& _argument) : argument{std::move(_argument)} {}
+  explicit inline throw_statement(node&& _argument)
+      : argument{std::move(_argument)} {}
 };
 
 struct expression : base {
@@ -95,7 +98,7 @@ struct unary_expression : expression {
   unary_op op;
   node argument;
 
-  inline unary_expression(unary_op _op, node&& _argument)
+  explicit inline unary_expression(unary_op _op, node&& _argument)
       : op{_op}, argument{std::move(_argument)} {}
 };
 
@@ -104,7 +107,7 @@ struct binary_expression : expression {
   binary_op op;
   node right;
 
-  inline binary_expression(node&& _left, binary_op _op, node&& _right)
+  explicit inline binary_expression(node&& _left, binary_op _op, node&& _right)
       : left{std::move(_left)}, op{_op}, right{std::move(_right)} {}
 };
 
@@ -113,10 +116,11 @@ struct assignment_expression : expression {
   assignment_op op;
   node right;
 
-  inline assignment_expression(node&& _left, node&& _right)
+  explicit inline assignment_expression(node&& _left, node&& _right)
       : assignment_expression{std::move(_left), assignment_op::standard,
                               std::move(_right)} {}
-  inline assignment_expression(node&& _left, assignment_op _op, node&& _right)
+  explicit inline assignment_expression(node&& _left, assignment_op _op,
+                                        node&& _right)
       : left{std::move(_left)}, op{_op}, right{std::move(_right)} {}
 };
 
@@ -125,8 +129,8 @@ struct update_expression : expression {
   node argument;
   unary_op_location loc;
 
-  inline update_expression(update_op _op, node&& _argument,
-                           unary_op_location _loc)
+  explicit inline update_expression(update_op _op, node&& _argument,
+                                    unary_op_location _loc)
       : op{_op}, argument{std::move(_argument)}, loc{_loc} {}
 };
 
@@ -135,7 +139,8 @@ struct logical_expression : expression {
   logical_op op;
   node right;
 
-  inline logical_expression(node&& _left, logical_op _op, node&& _right)
+  explicit inline logical_expression(node&& _left, logical_op _op,
+                                     node&& _right)
       : left{std::move(_left)}, op{_op}, right{std::move(_right)} {}
 };
 
@@ -144,8 +149,8 @@ struct conditional_expression : expression {
   node consequent;
   node alternate;
 
-  inline conditional_expression(node&& _test, node&& _consequent,
-                                node&& _alternate)
+  explicit inline conditional_expression(node&& _test, node&& _consequent,
+                                         node&& _alternate)
       : test{std::move(_test)},
         consequent{std::move(_consequent)},
         alternate{std::move(_alternate)} {}
@@ -155,7 +160,7 @@ struct base_call_expression : expression {
   node callee;
   node_vector arguments;
 
-  inline base_call_expression(node&& _callee, node_vector&& _arguments)
+  explicit inline base_call_expression(node&& _callee, node_vector&& _arguments)
       : callee{std::move(_callee)}, arguments{std::move(_arguments)} {}
 };
 
@@ -171,7 +176,7 @@ struct member_expression : expression {
   node object;
   std::string property;
 
-  inline member_expression(node&& _object, std::string _property)
+  explicit inline member_expression(node&& _object, std::string _property)
       : object{std::move(_object)}, property{_property} {}
 };
 
@@ -179,28 +184,38 @@ struct computed_member_expression : expression {
   node object;
   node property;
 
-  inline computed_member_expression(node&& _object, node&& _property)
+  explicit inline computed_member_expression(node&& _object, node&& _property)
       : object{std::move(_object)}, property{std::move(_property)} {}
 };
 
 struct yield_expression : expression {
   std::optional<node> argument;
 
-  inline yield_expression() noexcept {}
-  inline yield_expression(node&& _argument) : argument{std::move(_argument)} {}
+  explicit inline yield_expression() noexcept {}
+  explicit inline yield_expression(node&& _argument)
+      : argument{std::move(_argument)} {}
 };
 
 struct delegate_yield_expression : expression {
   node argument;
 
-  inline delegate_yield_expression(node&& _argument)
+  explicit inline delegate_yield_expression(node&& _argument)
       : argument{std::move(_argument)} {}
 };
 
 struct await_expression : expression {
   node argument;
 
-  inline await_expression(node&& _argument) : argument{std::move(_argument)} {}
+  explicit inline await_expression(node&& _argument)
+      : argument{std::move(_argument)} {}
+};
+
+struct meta_property : expression {
+  std::string meta;
+  std::string property;
+
+  explicit inline meta_property(std::string _meta, std::string _property)
+      : meta{_meta}, property{_property} {}
 };
 
 struct pattern : base {
@@ -210,27 +225,29 @@ struct pattern : base {
 struct identifier : pattern {
   std::string name;
 
-  inline identifier(std::string _name) : name{_name} {}
+  explicit inline identifier(std::string _name) : name{_name} {}
 };
 
 struct assignment_pattern : pattern {
   node left;
   node right;
 
-  inline assignment_pattern(node&& _left, node&& _right)
+  explicit inline assignment_pattern(node&& _left, node&& _right)
       : left{std::move(_left)}, right{std::move(_right)} {}
 };
 
 struct rest_element : pattern {
   node argument;
 
-  inline rest_element(node&& _argument) : argument{std::move(_argument)} {}
+  explicit inline rest_element(node&& _argument)
+      : argument{std::move(_argument)} {}
 };
 
 struct spread_element : base {
   node argument;
 
-  inline spread_element(node&& _argument) : argument{std::move(_argument)} {}
+  explicit inline spread_element(node&& _argument)
+      : argument{std::move(_argument)} {}
 };
 
 struct literal : expression {
@@ -244,27 +261,27 @@ struct null_literal : literal {
 struct bool_literal : literal {
   bool value;
 
-  inline bool_literal(bool _value) noexcept : value{_value} {}
+  explicit inline bool_literal(bool _value) noexcept : value{_value} {}
 };
 
 struct number_literal : literal {
   std::string number;
 
   template <typename number_type>
-  inline number_literal(number_type _number)
+  explicit inline number_literal(number_type _number)
       : number{std::to_string(_number)} {}
 };
 
 struct string_literal : literal {
   std::string string;
 
-  inline string_literal(std::string _string) : string{_string} {}
+  explicit inline string_literal(std::string _string) : string{_string} {}
 };
 
 struct raw_literal : literal {
   std::string raw;
 
-  inline raw_literal(std::string _raw) : raw{_raw} {}
+  explicit inline raw_literal(std::string _raw) : raw{_raw} {}
 };
 
 }  // namespace ast

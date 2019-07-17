@@ -41,21 +41,35 @@ struct generator {
     return {start, _loc};
   }
 
-  inline void write_node(const ast::node& node) { node.write_to(*this); }
+  inline void write_elems() noexcept {}
+  template <typename... arg_type>
+  inline void write_elems(std::string str, arg_type&&... args) {
+    write_raw(str);
+    write_elems(std::forward<arg_type>(args)...);
+  }
+  template <typename... arg_type>
+  inline void write_elems(const ast::node& node, arg_type&&... args) {
+    node.write_to(*this);
+    write_elems(std::forward<arg_type>(args)...);
+  }
+  template <
+      typename node_type, typename... arg_type,
+      typename = std::enable_if_t<std::is_base_of_v<ast::base, node_type>>>
+  inline void write_elems(const node_type& node, arg_type&&... args) {
+    write_node(node);
+    write_elems(std::forward<arg_type>(args)...);
+  }
 
-  inline void write_node(const ast::super&) { write_raw("super"); }
+  inline void write_node(const ast::super&) { write_elems("super"); }
 
-  inline void write_node(const ast::empty_statement&) { write_raw(";"); }
+  inline void write_node(const ast::empty_statement&) { write_elems(";"); }
 
   inline void write_node(const ast::expression_statement& statement) {
-    write_node(statement.expression);
-    write_raw(";");
+    write_elems(statement.expression, ";");
   }
 
   inline void write_node(const ast::labeled_statement& statement) {
-    write_node(statement.label);
-    write_raw(": ");
-    write_node(statement.body);
+    write_elems(statement.label, ": ", statement.body);
   }
 
   inline void write_node(const ast::break_statement& statement) {
@@ -67,73 +81,60 @@ struct generator {
   }
 
   inline void write_node(const ast::with_statement& statement) {
-    write_raw("with (");
-    write_node(statement.object);
-    write_raw(") ");
-    write_node(statement.body);
+    write_elems("with (", statement.object, ") ", statement.body);
   }
 
   inline void write_node(const ast::return_statement& statement) {
-    write_raw("return");
+    write_elems("return");
     if (statement.argument.has_value()) {
-      write_raw(" ");
-      write_node(statement.argument.value());
+      write_elems(" ", statement.argument.value());
     }
     write_raw(";");
   }
 
   inline void write_node(const ast::throw_statement& statement) {
-    write_raw("throw ");
-    write_node(statement.argument);
-    write_raw(";");
+    write_elems("throw ", statement.argument, ";");
   }
 
   inline void write_node(const ast::this_expression&) { write_raw("this"); }
 
   inline void write_node(const ast::unary_expression& unary) {
     const auto op_symbol{symbol_for(unary.op)};
-    write_raw(op_symbol);
+    write_elems(op_symbol);
     if (op_symbol.size() > 1) {
-      write_raw(" ");
+      write_elems(" ");
     }
 
     if (precedence_for(unary.argument) < precedence<ast::unary_expression>) {
-      write_raw("(");
-      write_node(unary.argument);
-      write_raw(")");
+      write_elems("(", unary.argument, ")");
     } else {
-      write_node(unary.argument);
+      write_elems(unary.argument);
     }
   }
 
   inline void write_node(const ast::binary_expression& binary) {
     if (binary.op == binary_op::in) {
       // Avoids confusion in for-loop initializers
-      write_raw("(");
+      write_elems("(");
       write_binary(binary);
-      write_raw(")");
+      write_elems(")");
     } else {
       write_binary(binary);
     }
   }
 
   inline void write_node(const ast::assignment_expression& assignment) {
-    write_node(assignment.left);
-    write_raw(" ");
-    write_raw(symbol_for(assignment.op));
-    write_raw(" ");
-    write_node(assignment.right);
+    write_elems(assignment.left, " ", symbol_for(assignment.op), " ",
+                assignment.right);
   }
 
   inline void write_node(const ast::update_expression& update) {
     switch (update.loc) {
       case unary_op_location::prefix:
-        write_raw(symbol_for(update.op));
-        write_node(update.argument);
+        write_elems(symbol_for(update.op), update.argument);
         break;
       case unary_op_location::suffix:
-        write_node(update.argument);
-        write_raw(symbol_for(update.op));
+        write_elems(update.argument, symbol_for(update.op));
         break;
     }
   }
@@ -145,25 +146,18 @@ struct generator {
   inline void write_node(const ast::conditional_expression& conditional) {
     if (precedence_for(conditional.test) >
         precedence<ast::conditional_expression>) {
-      write_node(conditional.test);
+      write_elems(conditional.test);
     } else {
-      write_raw("(");
-      write_node(conditional.test);
-      write_raw(")");
+      write_elems("(", conditional.test, ")");
     }
-    write_raw(" ? ");
-    write_node(conditional.consequent);
-    write_raw(" : ");
-    write_node(conditional.alternate);
+    write_elems(" ? ", conditional.consequent, " : ", conditional.alternate);
   }
 
   inline void write_node(const ast::call_expression& call) {
     if (precedence_for(call.callee) < precedence<ast::call_expression>) {
-      write_raw("(");
-      write_node(call.callee);
-      write_raw(")");
+      write_elems("(", call.callee, ")");
     } else {
-      write_node(call.callee);
+      write_elems(call.callee);
     }
     write_sequence(call.arguments);
   }
@@ -183,24 +177,20 @@ struct generator {
       }
     }
 
-    write_raw("new ");
+    write_elems("new ");
     if (needs_parenthesis) {
-      write_raw("(");
-      write_node(call.callee);
-      write_raw(")");
+      write_elems("(", call.callee, ")");
     } else {
-      write_node(call.callee);
+      write_elems(call.callee);
     }
     write_sequence(call.arguments);
   }
 
   inline void write_node(const ast::member_expression& member) {
     if (precedence_for(member.object) < precedence<ast::member_expression>) {
-      write_raw("(");
-      write_node(member.object);
-      write_raw(")");
+      write_elems("(", member.object, ")");
     } else {
-      write_node(member.object);
+      write_elems(member.object);
     }
 
     // Test for identifier
@@ -217,129 +207,115 @@ struct generator {
     }
 
     if (is_identifier) {
-      write_raw(".");
-      write_raw(member.property);
+      write_elems(".", member.property);
     } else {
-      write_raw("[");
-      write_raw(quoted(member.property));
-      write_raw("]");
+      write_elems("[", quoted(member.property), "]");
     }
   }
 
   inline void write_node(const ast::computed_member_expression& member) {
     if (precedence_for(member.object) < precedence<ast::member_expression>) {
-      write_raw("(");
-      write_node(member.object);
-      write_raw(")");
+      write_elems("(", member.object, ")");
     } else {
-      write_node(member.object);
+      write_elems(member.object);
     }
-    write_raw("[");
-    write_node(member.property);
-    write_raw("]");
+    write_elems("[", member.property, "]");
   }
 
   inline void write_node(const ast::yield_expression& yield) {
-    write_raw("yield");
+    write_elems("yield");
     if (yield.argument.has_value()) {
-      write_raw(" ");
-      write_node(yield.argument.value());
+      write_elems(" ", yield.argument.value());
     }
   }
 
   inline void write_node(const ast::delegate_yield_expression& yield) {
-    write_raw("yield* ");
-    write_node(yield.argument);
+    write_elems("yield* ", yield.argument);
   }
 
   inline void write_node(const ast::await_expression& await) {
-    write_raw("await ");
-    write_node(await.argument);
+    write_elems("await ", await.argument);
+  }
+
+  inline void write_node(const ast::meta_property& meta) {
+    write_elems(meta.meta, ".", meta.property);
   }
 
   inline void write_node(const ast::identifier& identifier) {
-    write_raw(identifier.name);
+    write_elems(identifier.name);
   }
 
   inline void write_node(const ast::assignment_pattern& assignment) {
-    write_node(assignment.left);
-    write_raw(" = ");
-    write_node(assignment.right);
+    write_elems(assignment.left, " = ", assignment.right);
   }
 
   inline void write_node(const ast::rest_element& rest) {
-    write_raw("...");
-    write_node(rest.argument);
+    write_elems("...", rest.argument);
   }
 
   inline void write_node(const ast::spread_element& spread) {
-    write_raw("...");
-    write_node(spread.argument);
+    write_elems("...", spread.argument);
   }
 
-  inline void write_node(const ast::null_literal&) { write_raw("null"); }
+  inline void write_node(const ast::null_literal&) { write_elems("null"); }
 
   inline void write_node(const ast::bool_literal& literal) {
-    write_raw(literal.value ? "true" : "false");
+    write_elems(literal.value ? "true" : "false");
   }
 
   inline void write_node(const ast::number_literal& literal) {
-    write_raw(literal.number);
+    write_elems(literal.number);
   }
 
   inline void write_node(const ast::string_literal& literal) {
-    write_raw(quoted(literal.string));
+    write_elems(quoted(literal.string));
   }
 
   inline void write_node(const ast::raw_literal& literal) {
-    write_raw(literal.raw);
+    write_elems(literal.raw);
   }
 
   template <typename node_type>
   inline void write_statement(const node_type& node) {
     write_indent();
-    write_node(node);
+    write_elems(node);
     write_line_end();
   }
 
   template <typename node_type>
   inline void write_control_interrupt(const node_type& node, std::string name) {
-    write_raw(name);
+    write_elems(name);
     if (node.label.has_value()) {
-      write_raw(" ");
-      write_node(node.label.value());
+      write_elems(" ", node.label.value());
     }
-    write_raw(";");
+    write_elems(";");
   }
 
   inline void write_sequence(const node_vector& nodes) {
-    write_raw("(");
+    write_elems("(");
     if (nodes.size() > 0) {
-      write_node(nodes[0]);
+      write_elems(nodes[0]);
       for (size_t i{1}; i < nodes.size(); i++) {
-        write_raw(", ");
-        write_node(nodes[i]);
+        write_elems(", ", nodes[i]);
       }
     }
-    write_raw(")");
+    write_elems(")");
   }
 
   template <typename node_type>
   inline void write_binary(const node_type& node) {
     write_binary_operand(node, node.left, binary_operand_location::left);
-    write_raw(" ");
-    write_raw(symbol_for(node.op));
-    write_raw(" ");
+    write_elems(" ", symbol_for(node.op), " ");
     write_binary_operand(node, node.right, binary_operand_location::right);
   }
   template <typename parent_type>
   void write_binary_operand(const parent_type& parent, const ast::node& node,
                             binary_operand_location loc);
 
-  inline void write_line_end() { write_raw(config.line_end); }
+  inline void write_line_end() { write_elems(config.line_end); }
   inline void write_indent() {
     for (size_t i{0}; i < _indent_level; i++) {
-      write_raw(config.indent);
+      write_elems(config.indent);
     }
   }
 
