@@ -16,8 +16,36 @@ struct base {
   explicit inline base() noexcept {}
 };
 
+struct program : base {
+  utils::move_vector<node> body;
+
+  explicit inline program(utils::move_vector<node>&& _body)
+      : body{std::move(_body)} {}
+};
+
 struct super : base {
   using base::base;
+};
+
+struct switch_case : base {
+  std::optional<node> test;
+  utils::move_vector<node> consequent;
+
+  explicit inline switch_case(utils::move_vector<node>&& _consequent)
+      : switch_case{std::nullopt, std::move(_consequent)} {}
+  explicit inline switch_case(std::optional<node>&& _test,
+                              utils::move_vector<node>&& _consequent)
+      : test{std::move(_test)}, consequent{std::move(_consequent)} {}
+};
+
+struct catch_clause : base {
+  std::optional<node> pattern;
+  node body;
+
+  explicit inline catch_clause(node&& _body)
+      : catch_clause{std::nullopt, std::move(_body)} {}
+  explicit inline catch_clause(std::optional<node>&& _pattern, node&& _body)
+      : pattern{std::move(_pattern)}, body{std::move(_body)} {}
 };
 
 struct variable_declarator : base {
@@ -94,6 +122,15 @@ struct with_statement : statement {
       : object{std::move(_object)}, body{std::move(_body)} {}
 };
 
+struct switch_statement : statement {
+  node discriminant;
+  utils::move_vector<node> cases;
+
+  explicit inline switch_statement(node&& _discriminant,
+                                   utils::move_vector<node>&& _cases)
+      : discriminant{std::move(_discriminant)}, cases{std::move(_cases)} {}
+};
+
 struct return_statement : statement {
   std::optional<node> argument;
 
@@ -107,6 +144,19 @@ struct throw_statement : statement {
 
   explicit inline throw_statement(node&& _argument)
       : argument{std::move(_argument)} {}
+};
+
+struct try_statement : statement {
+  node block;
+  std::optional<node> handler;
+  std::optional<node> finalizer;
+
+  explicit inline try_statement(node&& _block,
+                                std::optional<node>&& _handler = std::nullopt,
+                                std::optional<node>&& _finalizer = std::nullopt)
+      : block{std::move(_block)},
+        handler{std::move(_handler)},
+        finalizer{std::move(_finalizer)} {}
 };
 
 struct while_statement : statement {
@@ -123,6 +173,49 @@ struct do_while_statement : statement {
 
   explicit inline do_while_statement(node&& _test, node&& _body)
       : test{std::move(_test)}, body{std::move(_body)} {}
+};
+
+struct for_statement : statement {
+  std::optional<node> init;
+  std::optional<node> test;
+  std::optional<node> update;
+  node body;
+
+  explicit inline for_statement(std::optional<node>&& _init,
+                                std::optional<node>&& _test,
+                                std::optional<node>&& _update, node&& _body)
+      : init{std::move(_init)},
+        test{std::move(_test)},
+        update{std::move(_update)},
+        body{std::move(_body)} {}
+};
+
+struct for_in_statement : statement {
+  node left;
+  node right;
+  node body;
+  bool await;
+
+  explicit inline for_in_statement(node&& _left, node&& _right, node&& _body,
+                                   bool _await = false)
+      : left{std::move(_left)},
+        right{std::move(_right)},
+        body{std::move(_body)},
+        await{_await} {}
+};
+
+struct for_of_statement : statement {
+  node left;
+  node right;
+  node body;
+  bool await;
+
+  explicit inline for_of_statement(node&& _left, node&& _right, node&& _body,
+                                   bool _await = false)
+      : left{std::move(_left)},
+        right{std::move(_right)},
+        body{std::move(_body)},
+        await{_await} {}
 };
 
 struct debugger_statement : statement {
@@ -356,6 +449,14 @@ struct string_literal : literal {
   std::string string;
 
   explicit inline string_literal(std::string _string) : string{_string} {}
+};
+
+struct reg_exp_literal : literal {
+  std::string pattern;
+  std::string flags;
+
+  explicit inline reg_exp_literal(std::string _pattern, std::string _flags = "")
+      : pattern{_pattern}, flags{_flags} {}
 };
 
 struct raw_literal : literal {

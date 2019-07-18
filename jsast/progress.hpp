@@ -1,13 +1,12 @@
 // Reference only
 enum class ast_node_type {
-  unexpected_node /* should never occur! */,
-  program,
-  super,  // √
+  program,  // √
+  super,    // √
   class_body,
   property,
   assignment_property,
-  switch_case,
-  catch_clause,
+  switch_case,          // √
+  catch_clause,         // √
   variable_declarator,  // √
   method_definition,
   empty_statement,       // √
@@ -18,15 +17,15 @@ enum class ast_node_type {
   break_statement,       // √
   continue_statement,    // √
   with_statement,        // √
-  switch_statement,
-  return_statement,  // √
-  throw_statement,   // √
-  try_statement,
-  while_statement,     // √
-  do_while_statement,  // √
-  for_statement,
-  for_in_statement,
-  for_of_statement,
+  switch_statement,      // √
+  return_statement,      // √
+  throw_statement,       // √
+  try_statement,         // √
+  while_statement,       // √
+  do_while_statement,    // √
+  for_statement,         // √
+  for_in_statement,      // √
+  for_of_statement,      // √
   debugger_statement,    // √
   variable_declaration,  // √
   function_declaration,
@@ -68,6 +67,6 @@ enum class ast_node_type {
   bool_literal,        // √
   number_literal,      // √
   string_literal,      // √
-  reg_exp_literal,
-  raw_literal,  // √
+  reg_exp_literal,     // √
+  raw_literal,         // √
 };

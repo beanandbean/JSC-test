@@ -25,7 +25,7 @@ inline size_t precedence_for_type(std::type_index node) noexcept {
       {typeid(ast::bool_literal), 18},
       {typeid(ast::number_literal), 18},
       {typeid(ast::string_literal), 18},
-      // {typeid(ast::reg_exp_literal), 18},
+      {typeid(ast::reg_exp_literal), 18},
       {typeid(ast::raw_literal), 18},
       // Operations
       {typeid(ast::member_expression), 19},

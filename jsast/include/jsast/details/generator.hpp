@@ -60,7 +60,53 @@ struct generator {
     write_elems(std::forward<arg_type>(args)...);
   }
 
+  inline void write_node(const ast::program& program) {
+    const auto length = program.body.size();
+    if (length > 1) {
+      for (size_t i{0}; i < length; i++) {
+        const auto& node = program.body[i];
+        if (i == 0) {
+          write_elems(node);
+          write_line_end();
+        } else if (i == length - 1) {
+          write_indent();
+          write_elems(node);
+        } else {
+          write_statement(node);
+        }
+      }
+    } else if (length == 1) {
+      write_elems(program.body[0]);
+    }
+  }
+
   inline void write_node(const ast::super&) { write_elems("super"); }
+
+  inline void write_node(const ast::switch_case& case_node) {
+    if (case_node.test.has_value()) {
+      write_elems("case ", case_node.test.value(), ":");
+    } else {
+      write_elems("default:");
+    }
+    if (case_node.consequent.size() > 0) {
+      write_line_end();
+      _indent_level++;
+      for (size_t i{0}; i < case_node.consequent.size() - 1; i++) {
+        write_statement(case_node.consequent[i]);
+      }
+      write_indent();
+      write_elems(case_node.consequent.back());
+      _indent_level--;
+    }
+  }
+
+  inline void write_node(const ast::catch_clause& clause) {
+    write_elems("catch ");
+    if (clause.pattern.has_value()) {
+      write_elems("(", clause.pattern.value(), ") ");
+    }
+    write_elems(clause.body);
+  }
 
   inline void write_node(const ast::variable_declarator& declarator) {
     write_elems(declarator.id);
@@ -102,6 +148,18 @@ struct generator {
     write_elems("with (", statement.object, ") ", statement.body);
   }
 
+  inline void write_node(const ast::switch_statement& statement) {
+    write_elems("switch (", statement.discriminant, ") {");
+    write_line_end();
+    _indent_level++;
+    for (const auto& case_node : statement.cases) {
+      write_statement(case_node);
+    }
+    _indent_level--;
+    write_indent();
+    write_elems("}");
+  }
+
   inline void write_node(const ast::return_statement& statement) {
     write_elems("return");
     if (statement.argument.has_value()) {
@@ -114,12 +172,52 @@ struct generator {
     write_elems("throw ", statement.argument, ";");
   }
 
+  inline void write_node(const ast::try_statement& statement) {
+    write_elems("try ", statement.block);
+    if (statement.handler.has_value()) {
+      write_elems(" ", statement.handler.value());
+    }
+    if (statement.finalizer.has_value()) {
+      write_elems(" finally ", statement.finalizer.value());
+    }
+  }
+
   inline void write_node(const ast::while_statement& statement) {
     write_elems("while (", statement.test, ") ", statement.body);
   }
 
   inline void write_node(const ast::do_while_statement& statement) {
     write_elems("do", statement.body, " while (", statement.test, ");");
+  }
+
+  inline void write_node(const ast::for_statement& statement) {
+    write_elems("for (");
+    if (statement.init.has_value()) {
+      const auto& init = statement.init.value();
+      if (node_is<ast::variable_declaration>(init)) {
+        write_variable_declaration(
+            static_cast<const ast::variable_declaration&>(init.get()));
+      } else {
+        write_elems(init);
+      }
+    }
+    write_elems("; ");
+    if (statement.test.has_value()) {
+      write_elems(statement.test.value());
+    }
+    write_elems("; ");
+    if (statement.update.has_value()) {
+      write_elems(statement.update.value());
+    }
+    write_elems(") ", statement.body);
+  }
+
+  inline void write_node(const ast::for_in_statement& statement) {
+    write_for_iterator_statement(statement, "in");
+  }
+
+  inline void write_node(const ast::for_of_statement& statement) {
+    write_for_iterator_statement(statement, "of");
   }
 
   inline void write_node(const ast::debugger_statement&) {
@@ -318,6 +416,10 @@ struct generator {
     write_elems(utils::quoted(literal.string));
   }
 
+  inline void write_node(const ast::reg_exp_literal& literal) {
+    write_elems("/", literal.pattern, "/", literal.flags);
+  }
+
   inline void write_node(const ast::raw_literal& literal) {
     write_elems(literal.raw);
   }
@@ -341,6 +443,23 @@ struct generator {
       write_indent();
     }
     write_elems("}");
+  }
+
+  template <typename node_type>
+  inline void write_for_iterator_statement(const node_type& node,
+                                           std::string op) {
+    write_elems("for ");
+    if (node.await) {
+      write_elems("await ");
+    }
+    write_elems("(");
+    if (node_is<ast::variable_declaration>(node.left)) {
+      write_variable_declaration(
+          static_cast<const ast::variable_declaration&>(node.left.get()));
+    } else {
+      write_elems(node.left);
+    }
+    write_elems(" ", op, " ", node.right, ") ", node.body);
   }
 
   inline void write_variable_declaration(

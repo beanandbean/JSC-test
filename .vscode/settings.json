@@ -64,6 +64,17 @@
     "optional": "cpp",
     "__hash_table": "cpp",
     "__functional_base_03": "cpp",
-    "typeindex": "cpp"
+    "typeindex": "cpp",
+    "__tree": "cpp",
+    "codecvt": "cpp",
+    "condition_variable": "cpp",
+    "csignal": "cpp",
+    "deque": "cpp",
+    "list": "cpp",
+    "map": "cpp",
+    "set": "cpp",
+    "strstream": "cpp",
+    "thread": "cpp",
+    "variant": "cpp"
   }
 }
