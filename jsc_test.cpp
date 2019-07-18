@@ -4,7 +4,7 @@
 #include <iostream>
 #include <sstream>
 
-#include "jsc/jsc.hpp"
+#include <jsc/jsc.hpp>
 
 int main(int argc, const char* argv[]) {
   auto ctx = jsc::context{};

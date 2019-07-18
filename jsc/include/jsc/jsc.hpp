@@ -4,11 +4,11 @@
 #ifndef jsc_hpp
 #define jsc_hpp
 
-#include "context.hpp"
-#include "object.hpp"
-#include "property.hpp"
-#include "value.hpp"
+#include "details/context.hpp"
+#include "details/object.hpp"
+#include "details/property.hpp"
+#include "details/value.hpp"
 
-#include "object.inc.hpp"
+#include "details/object.inc.hpp"
 
 #endif  // jsc_hpp

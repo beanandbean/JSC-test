@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "jsast/jsast.hpp"
+#include <jsast/jsast.hpp>
 
 int main() {
   jsast::generator gen;
