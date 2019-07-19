@@ -9,6 +9,7 @@ enum class ast_node_type {
   catch_clause,         // √
   variable_declarator,  // √
   method_definition,
+  template_element,      // √
   empty_statement,       // √
   block_statement,       // √
   expression_statement,  // √
@@ -28,7 +29,7 @@ enum class ast_node_type {
   for_of_statement,      // √
   debugger_statement,    // √
   variable_declaration,  // √
-  function_declaration,
+  function_declaration,  // √
   class_declaration,
   import_declaration,
   export_default_declaration,
@@ -37,8 +38,8 @@ enum class ast_node_type {
   this_expression,   // √
   array_expression,  // √
   object_expression,
-  function_expression,
-  arrow_function_expression,
+  function_expression,         // √
+  arrow_function_expression,   // √
   sequence_expression,         // √
   unary_expression,            // √
   binary_expression,           // √
@@ -51,14 +52,13 @@ enum class ast_node_type {
   member_expression,           // √
   computed_member_expression,  // √
   yield_expression,            // √
-  delegate_yield_expression,   // √
   await_expression,            // √
   class_expression,
-  template_literal,
-  tagged_template_expression,
-  meta_property,  // √
-  identifier,     // √
-  array_pattern,  // √
+  template_literal,            // √
+  tagged_template_expression,  // √
+  meta_property,               // √
+  identifier,                  // √
+  array_pattern,               // √
   object_pattern,
   assignment_pattern,  // √
   rest_element,        // √

@@ -35,9 +35,6 @@ inline std::string quoted(const std::string& str) {
       case '\n':
         oss << "\\n";
         break;
-      case '\a':
-        oss << "\\a";
-        break;
       case '\b':
         oss << "\\b";
         break;
@@ -62,6 +59,37 @@ inline std::string quoted(const std::string& str) {
     }
   }
   oss << '"';
+  return oss.str();
+}
+
+inline std::string backquoted(const std::string& str) {
+  std::ostringstream oss;
+  for (size_t i{0}; i < str.size(); i++) {
+    const auto c{static_cast<uint8_t>(str[i])};
+    switch (c) {
+      case '\b':
+        oss << "\\b";
+        break;
+      case '\r':
+        oss << "\\r";
+        break;
+      case '\v':
+        oss << "\\v";
+        break;
+      case '\f':
+        oss << "\\f";
+        break;
+      case '`':
+        oss << "\\`";
+        break;
+      case '\\':
+        oss << "\\\\";
+        break;
+      default:
+        oss << c;
+        break;
+    }
+  }
   return oss.str();
 }
 

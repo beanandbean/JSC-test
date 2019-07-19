@@ -57,6 +57,12 @@ struct variable_declarator : base {
       : id{std::move(_id)}, init{std::move(_init)} {}
 };
 
+struct template_element : base {
+  std::string value;
+
+  explicit inline template_element(std::string _value) : value{_value} {}
+};
+
 struct statement : base {
   using base::base;
 };
@@ -92,11 +98,11 @@ struct if_statement : statement {
 };
 
 struct labeled_statement : statement {
-  node label;
+  std::string label;
   node body;
 
-  explicit inline labeled_statement(node&& _label, node&& _body)
-      : label{std::move(_label)}, body{std::move(_body)} {}
+  explicit inline labeled_statement(std::string _label, node&& _body)
+      : label{_label}, body{std::move(_body)} {}
 };
 
 struct break_statement : statement {
@@ -235,6 +241,24 @@ struct variable_declaration : declaration {
       : declarations{std::move(_declarations)}, kind{_kind} {}
 };
 
+struct function_declaration : declaration {
+  std::string id;
+  utils::move_vector<node> params;
+  node body;
+  bool async;
+  bool generator;
+
+  explicit inline function_declaration(std::string _id,
+                                       utils::move_vector<node>&& _params,
+                                       node&& _body, bool _async = false,
+                                       bool _generator = false)
+      : id{_id},
+        params{std::move(_params)},
+        body{std::move(_body)},
+        async{_async},
+        generator{_generator} {}
+};
+
 struct expression : base {
   using base::base;
 };
@@ -249,6 +273,39 @@ struct array_expression : expression {
   explicit inline array_expression(
       utils::move_vector<std::optional<node>>&& _elements)
       : elements{std::move(_elements)} {}
+};
+
+struct function_expression : expression {
+  std::optional<std::string> id;
+  utils::move_vector<node> params;
+  node body;
+  bool async;
+  bool generator;
+
+  explicit inline function_expression(utils::move_vector<node>&& _params,
+                                      node&& _body, bool _async = false,
+                                      bool _generator = false)
+      : function_expression{std::nullopt, std::move(_params), std::move(_body),
+                            _async, _generator} {}
+  explicit inline function_expression(std::optional<std::string> _id,
+                                      utils::move_vector<node>&& _params,
+                                      node&& _body, bool _async = false,
+                                      bool _generator = false)
+      : id{_id},
+        params{std::move(_params)},
+        body{std::move(_body)},
+        async{_async},
+        generator{_generator} {}
+};
+
+struct arrow_function_expression : expression {
+  utils::move_vector<node> params;
+  node body;
+  bool async;
+
+  explicit inline arrow_function_expression(utils::move_vector<node>&& _params,
+                                            node&& _body, bool _async = false)
+      : params{std::move(_params)}, body{std::move(_body)}, async{_async} {}
 };
 
 struct sequence_expression : expression {
@@ -355,17 +412,11 @@ struct computed_member_expression : expression {
 
 struct yield_expression : expression {
   std::optional<node> argument;
+  bool delegate;
 
   explicit inline yield_expression(
-      std::optional<node>&& _argument = std::nullopt)
-      : argument{std::move(_argument)} {}
-};
-
-struct delegate_yield_expression : expression {
-  node argument;
-
-  explicit inline delegate_yield_expression(node&& _argument)
-      : argument{std::move(_argument)} {}
+      std::optional<node>&& _argument = std::nullopt, bool _delegate = false)
+      : argument{std::move(_argument)}, delegate{_delegate} {}
 };
 
 struct await_expression : expression {
@@ -373,6 +424,21 @@ struct await_expression : expression {
 
   explicit inline await_expression(node&& _argument)
       : argument{std::move(_argument)} {}
+};
+
+struct template_literal : expression {
+  utils::move_vector<node> quasis;
+
+  explicit inline template_literal(utils::move_vector<node>&& _quasis)
+      : quasis{std::move(_quasis)} {}
+};
+
+struct tagged_template_expression : expression {
+  node tag;
+  node quasi;
+
+  explicit inline tagged_template_expression(node&& _tag, node&& _quasi)
+      : tag{std::move(_tag)}, quasi{std::move(_quasi)} {}
 };
 
 struct meta_property : expression {

@@ -115,6 +115,10 @@ struct generator {
     }
   }
 
+  inline void write_node(const ast::template_element& element) {
+    write_elems(utils::backquoted(element.value));
+  }
+
   inline void write_node(const ast::empty_statement&) { write_elems(";"); }
 
   inline void write_node(const ast::block_statement& statement) {
@@ -149,15 +153,8 @@ struct generator {
   }
 
   inline void write_node(const ast::switch_statement& statement) {
-    write_elems("switch (", statement.discriminant, ") {");
-    write_line_end();
-    _indent_level++;
-    for (const auto& case_node : statement.cases) {
-      write_statement(case_node);
-    }
-    _indent_level--;
-    write_indent();
-    write_elems("}");
+    write_elems("switch (", statement.discriminant, ") ");
+    write_block(statement.cases);
   }
 
   inline void write_node(const ast::return_statement& statement) {
@@ -229,10 +226,57 @@ struct generator {
     write_elems(";");
   }
 
+  inline void write_node(const ast::function_declaration& declaration) {
+    if (declaration.async) {
+      write_elems("async ");
+    }
+    if (declaration.generator) {
+      write_elems("function* ");
+    } else {
+      write_elems("function ");
+    }
+    write_elems(declaration.id);
+    write_function_body(declaration.params, declaration.body);
+  }
+
   inline void write_node(const ast::this_expression&) { write_raw("this"); }
 
   inline void write_node(const ast::array_expression& array) {
     write_array(array.elements);
+  }
+
+  inline void write_node(const ast::function_expression& function) {
+    if (function.async) {
+      write_elems("async ");
+    }
+    if (function.generator) {
+      write_elems("function* ");
+    } else {
+      write_elems("function ");
+    }
+    if (function.id.has_value()) {
+      write_elems(function.id.value());
+    }
+    write_function_body(function.params, function.body);
+  }
+
+  inline void write_node(const ast::arrow_function_expression& function) {
+    if (function.async) {
+      write_elems("async ");
+    }
+    if (function.params.size() == 1 &&
+        node_is<ast::identifier>(function.params[0])) {
+      write_elems(function.params[0]);
+    } else {
+      write_sequence(function.params);
+    }
+    write_elems(" => ");
+    // TODO:
+    // if (node_is<ast::object_expression>(function.body)) {
+    //   write_elems("(", function.body, ")");
+    // } else {
+    write_elems(function.body);
+    // }
   }
 
   inline void write_node(const ast::sequence_expression& sequence) {
@@ -364,18 +408,39 @@ struct generator {
   }
 
   inline void write_node(const ast::yield_expression& yield) {
-    write_elems("yield");
+    if (yield.delegate) {
+      write_elems("yield*");
+    } else {
+      write_elems("yield");
+    }
     if (yield.argument.has_value()) {
       write_elems(" ", yield.argument.value());
     }
   }
 
-  inline void write_node(const ast::delegate_yield_expression& yield) {
-    write_elems("yield* ", yield.argument);
-  }
-
   inline void write_node(const ast::await_expression& await) {
     write_elems("await ", await.argument);
+  }
+
+  inline void write_node(const ast::template_literal& literal) {
+    write_elems("`");
+    for (const auto& quasi : literal.quasis) {
+      if (node_is<ast::template_element>(quasi)) {
+        write_elems(quasi);
+      } else {
+        write_elems("${", quasi, "}");
+      }
+    }
+    write_elems("`");
+  }
+
+  inline void write_node(const ast::tagged_template_expression& expr) {
+    if (precedence_for(expr.tag) <= precedence_needs_parentheses) {
+      write_elems("(", expr.tag, ")");
+    } else {
+      write_elems(expr.tag);
+    }
+    write_elems(expr.quasi);
   }
 
   inline void write_node(const ast::meta_property& meta) {
@@ -460,6 +525,12 @@ struct generator {
       write_elems(node.left);
     }
     write_elems(" ", op, " ", node.right, ") ", node.body);
+  }
+
+  inline void write_function_body(const utils::move_vector<ast::node>& params,
+                                  const ast::node& body) {
+    write_sequence(params);
+    write_elems(" ", body);
   }
 
   inline void write_variable_declaration(
