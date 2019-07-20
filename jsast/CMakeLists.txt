@@ -1,5 +1,6 @@
-add_library(jsast src/generator.cpp)
-target_compile_features(jsast PUBLIC cxx_std_17)
+add_library(${PROJECT_NAME}.jsast src/generator.cpp)
+set_target_properties(${PROJECT_NAME}.jsast PROPERTIES OUTPUT_NAME libjsast.a)
+target_compile_features(${PROJECT_NAME}.jsast PUBLIC cxx_std_17)
 
-target_include_directories(jsast INTERFACE include)
-target_include_directories(jsast PRIVATE include/jsast/details)
+target_include_directories(${PROJECT_NAME}.jsast INTERFACE include)
+target_include_directories(${PROJECT_NAME}.jsast PRIVATE include/jsast/details)
