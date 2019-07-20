@@ -27,6 +27,20 @@ struct super : base {
   using base::base;
 };
 
+struct member_identifier : base {
+  std::string name;
+
+  explicit inline member_identifier(std::string _name) : name{_name} {}
+};
+
+struct property : base {
+  node key;
+  node value;
+
+  explicit inline property(node&& _key, node&& _value)
+      : key{std::move(_key)}, value{std::move(_value)} {}
+};
+
 struct switch_case : base {
   std::optional<node> test;
   utils::move_vector<node> consequent;
@@ -275,6 +289,13 @@ struct array_expression : expression {
       : elements{std::move(_elements)} {}
 };
 
+struct object_expression : expression {
+  utils::move_vector<node> properties;
+
+  explicit inline object_expression(utils::move_vector<node>&& _properties)
+      : properties{std::move(_properties)} {}
+};
+
 struct function_expression : expression {
   std::optional<std::string> id;
   utils::move_vector<node> params;
@@ -396,17 +417,9 @@ struct new_expression : base_call_expression {
 
 struct member_expression : expression {
   node object;
-  std::string property;
-
-  explicit inline member_expression(node&& _object, std::string _property)
-      : object{std::move(_object)}, property{_property} {}
-};
-
-struct computed_member_expression : expression {
-  node object;
   node property;
 
-  explicit inline computed_member_expression(node&& _object, node&& _property)
+  explicit inline member_expression(node&& _object, node&& _property)
       : object{std::move(_object)}, property{std::move(_property)} {}
 };
 
@@ -465,6 +478,13 @@ struct array_pattern : pattern {
   explicit inline array_pattern(
       utils::move_vector<std::optional<node>>&& _elements)
       : elements{std::move(_elements)} {}
+};
+
+struct object_pattern : pattern {
+  utils::move_vector<node> properties;
+
+  explicit inline object_pattern(utils::move_vector<node>&& _properties)
+      : properties{std::move(_properties)} {}
 };
 
 struct assignment_pattern : pattern {

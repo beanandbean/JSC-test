@@ -29,11 +29,10 @@ inline size_t precedence_for_type(std::type_index node) noexcept {
       {typeid(ast::raw_literal), 18},
       // Operations
       {typeid(ast::member_expression), 19},
-      {typeid(ast::computed_member_expression), 19},
       {typeid(ast::call_expression), 19},
       {typeid(ast::new_expression), 19},
       // Other definitions
-      // {typeid(ast::object_expression), precedence_needs_parentheses},
+      {typeid(ast::object_expression), precedence_needs_parentheses},
       {typeid(ast::function_expression), precedence_needs_parentheses},
       {typeid(ast::arrow_function_expression), precedence_needs_parentheses},
       // {typeid(ast::class_expression), precedence_needs_parentheses},

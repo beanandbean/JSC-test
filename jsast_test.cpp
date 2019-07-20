@@ -29,7 +29,8 @@ int main() {
            jsast::ast::if_statement{
                jsast::ast::binary_expression{
                    jsast::ast::member_expression{
-                       jsast::ast::identifier{"value"}, "$data"},
+                       jsast::ast::identifier{"value"},
+                       jsast::ast::member_identifier{"$data"}},
                    jsast::binary_op::strict_not_equal,
                    jsast::ast::template_literal{
                        {jsast::ast::template_element{"Failed at `"},
@@ -37,7 +38,7 @@ int main() {
                         jsast::ast::template_element{"`!"}}}},
                jsast::ast::block_statement{{jsast::ast::expression_statement{
                    jsast::ast::assignment_expression{
-                       jsast::ast::computed_member_expression{
+                       jsast::ast::member_expression{
                            jsast::ast::identifier{"value"},
                            jsast::ast::binary_expression{
                                jsast::ast::number_literal{9},
@@ -84,7 +85,8 @@ int main() {
                                    jsast::ast::call_expression{
                                        jsast::ast::member_expression{
                                            jsast::ast::identifier{"incoming"},
-                                           "packets"},
+                                           jsast::ast::member_identifier{
+                                               "packets"}},
                                        {jsast::ast::identifier{"ratio"}}},
                                    true}}}},
                        false,
@@ -100,14 +102,23 @@ int main() {
                         {jsast::ast::expression_statement{
                              jsast::ast::call_expression{
                                  jsast::ast::identifier{"worker"},
-                                 {jsast::ast::identifier{"sample"}}}},
+                                 {jsast::ast::object_expression{
+                                     {jsast::ast::property{
+                                          jsast::ast::member_identifier{
+                                              "text name"},
+                                          jsast::ast::identifier{"sample"}},
+                                      jsast::ast::property{
+                                          jsast::ast::member_identifier{
+                                              "aggregated"},
+                                          jsast::ast::bool_literal{true}}}}}}},
                          jsast::ast::break_statement{}}},
                     jsast::ast::switch_case{{jsast::ast::expression_statement{
                         jsast::ast::call_expression{
                             jsast::ast::identifier{"cleaner"},
                             {jsast::ast::identifier{"sample"}}}}}}}}}}},
            jsast::ast::return_statement{jsast::ast::member_expression{
-               jsast::ast::identifier{"system"}, "93: ratio"}}}}}}});
+               jsast::ast::identifier{"system"},
+               jsast::ast::member_identifier{"93: ratio"}}}}}}}});
 
   std::cout << gen.str();
 

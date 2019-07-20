@@ -82,6 +82,16 @@ struct generator {
 
   inline void write_node(const ast::super&) { write_elems("super"); }
 
+  inline void write_node(const ast::member_identifier& identifier) {
+    // This shall not be called.
+    write_member<false>(identifier);
+  }
+
+  inline void write_node(const ast::property& property) {
+    write_member<false>(property.key);
+    write_elems(": ", property.value);
+  }
+
   inline void write_node(const ast::switch_case& case_node) {
     if (case_node.test.has_value()) {
       write_elems("case ", case_node.test.value(), ":");
@@ -245,6 +255,10 @@ struct generator {
     write_array(array.elements);
   }
 
+  inline void write_node(const ast::object_expression& object) {
+    write_object(object);
+  }
+
   inline void write_node(const ast::function_expression& function) {
     if (function.async) {
       write_elems("async ");
@@ -271,12 +285,11 @@ struct generator {
       write_sequence(function.params);
     }
     write_elems(" => ");
-    // TODO:
-    // if (node_is<ast::object_expression>(function.body)) {
-    //   write_elems("(", function.body, ")");
-    // } else {
-    write_elems(function.body);
-    // }
+    if (node_is<ast::object_expression>(function.body)) {
+      write_elems("(", function.body, ")");
+    } else {
+      write_elems(function.body);
+    }
   }
 
   inline void write_node(const ast::sequence_expression& sequence) {
@@ -377,34 +390,7 @@ struct generator {
     } else {
       write_elems(member.object);
     }
-
-    // Test for identifier
-    auto is_identifier{member.property.size() > 0};
-    if (is_identifier) {
-      for (size_t i{0}; i < member.property.size(); i++) {
-        const auto ch{static_cast<uint8_t>(member.property[i])};
-        if ((ch < 'a' || ch > 'z') && (ch < 'A' || ch > 'Z') && ch != '_' &&
-            ch != '$' && (i == 0 || ch < '0' || ch > '9')) {
-          is_identifier = false;
-          break;
-        }
-      }
-    }
-
-    if (is_identifier) {
-      write_elems(".", member.property);
-    } else {
-      write_elems("[", utils::quoted(member.property), "]");
-    }
-  }
-
-  inline void write_node(const ast::computed_member_expression& member) {
-    if (precedence_for(member.object) < precedence<ast::member_expression>) {
-      write_elems("(", member.object, ")");
-    } else {
-      write_elems(member.object);
-    }
-    write_elems("[", member.property, "]");
+    write_member<true>(member.property);
   }
 
   inline void write_node(const ast::yield_expression& yield) {
@@ -453,6 +439,10 @@ struct generator {
 
   inline void write_node(const ast::array_pattern& array) {
     write_array(array.elements);
+  }
+
+  inline void write_node(const ast::object_pattern& object) {
+    write_object(object);
   }
 
   inline void write_node(const ast::assignment_pattern& assignment) {
@@ -584,6 +574,27 @@ struct generator {
   }
 
   template <typename node_type>
+  inline void write_object(const node_type& node) {
+    write_elems("{");
+    const auto length = node.properties.size();
+    if (length > 0) {
+      write_line_end();
+      _indent_level++;
+      for (size_t i{0}; i < length; i++) {
+        write_indent();
+        write_elems(node.properties[i]);
+        if (i < length - 1) {
+          write_elems(",");
+        }
+        write_line_end();
+      }
+      _indent_level--;
+      write_indent();
+    }
+    write_elems("}");
+  }
+
+  template <typename node_type>
   inline void write_binary(const node_type& node) {
     write_binary_operand(node, node.left, binary_operand_location::left);
     write_elems(" ", symbol_for(node.op), " ");
@@ -592,6 +603,44 @@ struct generator {
   template <typename parent_type>
   void write_binary_operand(const parent_type& parent, const ast::node& node,
                             binary_operand_location loc);
+
+  template <bool with_dot>
+  inline void write_member(const ast::member_identifier& identifier) {
+    // Test for identifier
+    auto is_identifier{identifier.name.size() > 0};
+    if (is_identifier) {
+      for (size_t i{0}; i < identifier.name.size(); i++) {
+        const auto ch{static_cast<uint8_t>(identifier.name[i])};
+        if ((ch < 'a' || ch > 'z') && (ch < 'A' || ch > 'Z') && ch != '_' &&
+            ch != '$' && (i == 0 || ch < '0' || ch > '9')) {
+          is_identifier = false;
+          break;
+        }
+      }
+    }
+
+    if (is_identifier) {
+      if constexpr (with_dot) {
+        write_elems(".");
+      }
+      write_elems(identifier.name);
+    } else {
+      if constexpr (with_dot) {
+        write_elems("[", utils::quoted(identifier.name), "]");
+      } else {
+        write_elems(utils::quoted(identifier.name));
+      }
+    }
+  }
+  template <bool with_dot>
+  inline void write_member(const ast::node& member) {
+    if (node_is<ast::member_identifier>(member)) {
+      write_member<with_dot>(
+          static_cast<const ast::member_identifier&>(member.get()));
+    } else {
+      write_elems("[", member, "]");
+    }
+  }
 
   inline void write_line_end() { write_elems(config.line_end); }
   inline void write_indent() {

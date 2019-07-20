@@ -1,5 +1,6 @@
 // JavaScript code generator based on project astring
 //   @ https://github.com/davidbonnet/astring
+// The AST tree used is a slightly-modified ESTree
 
 #ifndef jsast_hpp
 #define jsast_hpp
