@@ -9,6 +9,7 @@ struct source_loc {
   size_t line;
   size_t column;
 
+  inline source_loc() noexcept : source_loc{0, 0} {}
   inline source_loc(size_t _line, size_t _column) noexcept
       : line{_line}, column{_column} {}
 
@@ -53,6 +54,7 @@ struct source_range {
   source_loc begin;
   source_loc end;
 
+  inline source_range() noexcept : source_range{{}, {}} {}
   inline source_range(source_loc _begin, source_loc _end) noexcept
       : begin{_begin}, end{_end} {}
 
