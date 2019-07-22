@@ -50,16 +50,16 @@ inline bool binary_operand_needs_parenthesis(const parent_type& parent,
     return true;
   } else if (node_precedence != precedence<parent_type>) {
     return node_precedence < precedence<parent_type>;
-  } else if (node_is<ast::binary_expression>(node)) {
-    auto& binary{static_cast<const ast::binary_expression&>(node.get())};
+  } else if (node.is<ast::binary_expression>()) {
+    auto& binary{node.as<ast::binary_expression>()};
     if constexpr (std::is_same_v<parent_type, ast::binary_expression>) {
       if (binary.op == binary_op::power && parent.op == binary_op::power) {
         return loc != binary_operand_location::right;
       }
     }
     return binary_operand_needs_parenthesis_by_operator(parent, binary, loc);
-  } else if (node_is<ast::logical_expression>(node)) {
-    auto& logical{static_cast<const ast::logical_expression&>(node.get())};
+  } else if (node.is<ast::logical_expression>()) {
+    auto& logical{node.as<ast::logical_expression>()};
     return binary_operand_needs_parenthesis_by_operator(parent, logical, loc);
   } else {
     return false;

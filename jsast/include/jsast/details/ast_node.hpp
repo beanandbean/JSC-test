@@ -66,6 +66,15 @@ struct node {
   inline const base& get() const { return _impl->get(); }
   inline std::type_index type() const { return _impl->type(); }
 
+  template <typename node_type>
+  inline bool is() const {
+    return type() == typeid(node_type);
+  }
+  template <typename node_type>
+  inline const node_type& as() const {
+    return static_cast<const node_type&>(get());
+  }
+
  private:
   std::unique_ptr<impl_base> _impl;
 
@@ -73,11 +82,6 @@ struct node {
 };
 
 }  // namespace ast
-
-template <typename node_type>
-inline bool node_is(const ast::node& node) {
-  return node.type() == std::type_index{typeid(node_type)};
-}
 
 }  // namespace jsast
 

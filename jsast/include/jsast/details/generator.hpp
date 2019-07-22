@@ -201,9 +201,8 @@ struct generator {
     write_elems("for (");
     if (statement.init.has_value()) {
       const auto& init = statement.init.value();
-      if (node_is<ast::variable_declaration>(init)) {
-        write_variable_declaration(
-            static_cast<const ast::variable_declaration&>(init.get()));
+      if (init.is<ast::variable_declaration>()) {
+        write_variable_declaration(init.as<ast::variable_declaration>());
       } else {
         write_elems(init);
       }
@@ -279,13 +278,13 @@ struct generator {
       write_elems("async ");
     }
     if (function.params.size() == 1 &&
-        node_is<ast::identifier>(function.params[0])) {
+        function.params[0].is<ast::identifier>()) {
       write_elems(function.params[0]);
     } else {
       write_sequence(function.params);
     }
     write_elems(" => ");
-    if (node_is<ast::object_expression>(function.body)) {
+    if (function.body.is<ast::object_expression>()) {
       write_elems("(", function.body, ")");
     } else {
       write_elems(function.body);
@@ -366,11 +365,10 @@ struct generator {
     if (!needs_parenthesis) {
       // Check for call expression
       const auto* current = &call.callee;
-      while (node_is<ast::member_expression>(*current)) {
-        current =
-            &static_cast<const ast::member_expression&>(current->get()).object;
+      while (current->is<ast::member_expression>()) {
+        current = &current->as<ast::member_expression>().object;
       }
-      if (node_is<ast::call_expression>(*current)) {
+      if (current->is<ast::call_expression>()) {
         needs_parenthesis = true;
       }
     }
@@ -411,7 +409,7 @@ struct generator {
   inline void write_node(const ast::template_literal& literal) {
     write_elems("`");
     for (const auto& quasi : literal.quasis) {
-      if (node_is<ast::template_element>(quasi)) {
+      if (quasi.is<ast::template_element>()) {
         write_elems(quasi);
       } else {
         write_elems("${", quasi, "}");
@@ -508,9 +506,9 @@ struct generator {
       write_elems("await ");
     }
     write_elems("(");
-    if (node_is<ast::variable_declaration>(node.left)) {
+    if (node.left.template is<ast::variable_declaration>()) {
       write_variable_declaration(
-          static_cast<const ast::variable_declaration&>(node.left.get()));
+          node.left.template as<ast::variable_declaration>());
     } else {
       write_elems(node.left);
     }
@@ -634,9 +632,8 @@ struct generator {
   }
   template <bool with_dot>
   inline void write_member(const ast::node& member) {
-    if (node_is<ast::member_identifier>(member)) {
-      write_member<with_dot>(
-          static_cast<const ast::member_identifier&>(member.get()));
+    if (member.is<ast::member_identifier>()) {
+      write_member<with_dot>(member.as<ast::member_identifier>());
     } else {
       write_elems("[", member, "]");
     }
