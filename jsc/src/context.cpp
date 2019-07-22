@@ -16,13 +16,15 @@ JSValueRef context::callback_class_call(JSContextRef ctx, JSObjectRef function,
                                         size_t argument_count,
                                         const JSValueRef arguments[],
                                         JSValueRef* exception) {
-  auto callback{static_cast<internal_callback_type*>(JSObjectGetPrivate(function))};
+  auto callback{
+      static_cast<internal_callback_type*>(JSObjectGetPrivate(function))};
   return (*callback)(ctx, function, this_object, argument_count, arguments,
                      exception);
 }
 
 void context::callback_class_finalize(JSObjectRef function) {
-  auto callback{static_cast<internal_callback_type*>(JSObjectGetPrivate(function))};
+  auto callback{
+      static_cast<internal_callback_type*>(JSObjectGetPrivate(function))};
   delete callback;
 }
 

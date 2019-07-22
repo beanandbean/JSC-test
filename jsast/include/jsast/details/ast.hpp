@@ -8,9 +8,7 @@
 #include "specs.hpp"
 #include "utils.hpp"
 
-namespace jsast {
-
-namespace ast {
+namespace jsast::ast {
 
 struct base {
   explicit inline base() noexcept {}
@@ -551,8 +549,6 @@ struct raw_literal : literal {
   explicit inline raw_literal(std::string _raw) : raw{_raw} {}
 };
 
-}  // namespace ast
-
-}  // namespace jsast
+}  // namespace jsast::ast
 
 #endif  // jsast_ast_hpp

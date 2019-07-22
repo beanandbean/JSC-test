@@ -296,7 +296,7 @@ struct generator {
   }
 
   inline void write_node(const ast::unary_expression& unary) {
-    const auto op_symbol{symbol_for(unary.op)};
+    const std::string op_symbol{symbol_for(unary.op)};
     write_elems(op_symbol);
     if (op_symbol.size() > 1) {
       write_elems(" ");

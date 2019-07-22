@@ -11,7 +11,7 @@ namespace jsast {
 static constexpr size_t precedence_needs_parentheses{17};
 
 inline size_t precedence_for_type(std::type_index node) noexcept {
-  static std::unordered_map<std::type_index, size_t> precedence_map{
+  static const std::unordered_map<std::type_index, size_t> precedence_map{
       // Definitions
       {typeid(ast::array_expression), 20},
       {typeid(ast::tagged_template_expression), 20},
@@ -46,7 +46,13 @@ inline size_t precedence_for_type(std::type_index node) noexcept {
       {typeid(ast::await_expression), 2},
       {typeid(ast::yield_expression), 2},
       {typeid(ast::rest_element), 1}};
-  return precedence_map[node];
+  const auto found = precedence_map.find(node);
+  if (found == precedence_map.end()) {
+    /* should not happen */
+    return 0;
+  } else {
+    return found->second;
+  }
 }
 
 inline size_t precedence_for(const ast::node& node) {
