@@ -24,18 +24,18 @@ struct object {
 
   inline operator value() const { return {_ctx, _ref}; }
 
-  property<details::string_wrapper> operator[](std::string name) const;
+  property<details::string_wrapper> operator[](const std::string& name) const;
   property<unsigned int> operator[](unsigned int index) const;
 
   bool is_function() const;
 
   template <typename... arg_type>
-  inline value call(arg_type... args) const {
-    return callWithThisRef(nullptr, args...);
+  inline value call(arg_type&&... args) const {
+    return callWithThisRef(nullptr, std::forward<arg_type>(args)...);
   }
   template <typename... arg_type>
-  inline value callWithThis(object obj, arg_type... args) const {
-    return callWithThisRef(obj._ref, args...);
+  inline value callWithThis(object obj, arg_type&&... args) const {
+    return callWithThisRef(obj._ref, std::forward<arg_type>(args)...);
   }
 
   inline const JSObjectRef ref() const { return _ref; }
@@ -44,27 +44,30 @@ struct object {
   context& _ctx;
   JSObjectRef _ref;
 
-  bool has_property(details::string_wrapper name) const;
+  bool has_property(const details::string_wrapper& name) const;
   inline bool has_property(unsigned int index) const {
     return has_property(std::to_string(index));
   }
 
-  bool remove_property(details::string_wrapper name) const;
+  bool remove_property(const details::string_wrapper& name) const;
   inline bool remove_property(unsigned int index) const {
     return remove_property(std::to_string(index));
   }
 
-  value get_property(details::string_wrapper name) const;
+  value get_property(const details::string_wrapper& name) const;
   value get_property(unsigned int index) const;
 
-  void set_property(details::string_wrapper name, value val) const;
-  void set_property(unsigned int index, value val) const;
+  void set_property(const details::string_wrapper& name,
+                    const value& val) const;
+  void set_property(unsigned int index, const value& val) const;
   template <typename property_type, typename val_type,
             typename = std::enable_if_t<!std::is_same_v<val_type, value>>>
-  inline void set_property(property_type prop, val_type val) const;
+  inline void set_property(const property_type& prop, val_type&& val) const;
 
   template <typename... arg_type>
-  value callWithThisRef(JSObjectRef obj, arg_type... args) const;
+  value callWithThisRef(JSObjectRef obj, arg_type&&... args) const;
+  template <typename arg_type>
+  inline value transform_arg(arg_type&& arg) const;
 };
 
 }  // namespace jsc

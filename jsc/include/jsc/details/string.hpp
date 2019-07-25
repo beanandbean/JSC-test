@@ -7,8 +7,10 @@
 namespace jsc::details {
 
 struct string_wrapper {
-  inline string_wrapper(std::string str)
+  inline string_wrapper(const std::string& str)
       : _ref{JSStringCreateWithUTF8CString(str.data())} {}
+  inline string_wrapper(const char* str)
+      : _ref{JSStringCreateWithUTF8CString(str)} {}
   inline string_wrapper(JSStringRef unmanaged) : _ref{unmanaged} {}
   inline ~string_wrapper() { JSStringRelease(_ref); }
 
@@ -23,7 +25,7 @@ struct string_wrapper {
   }
 
   inline std::string get() const {
-    auto length{JSStringGetMaximumUTF8CStringSize(_ref)};
+    const auto length{JSStringGetMaximumUTF8CStringSize(_ref)};
     auto buffer{std::make_unique<char[]>(length)};
     JSStringGetUTF8CString(_ref, buffer.get(), length);
     return buffer.get();

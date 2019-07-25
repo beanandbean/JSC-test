@@ -1,14 +1,18 @@
+#include <utility>
+
 #include "context.hpp"
 
 namespace jsc {
 
-value context::eval_script(std::string script, std::string source_url) {
-  const details::string_wrapper js_url{source_url};
-  const details::string_wrapper js_script{script};
-  return {*this, try_throwable([this, &js_script, &js_url](auto exception) {
-            return JSEvaluateScript(_ref, js_script.managed_ref(), nullptr,
-                                    js_url.managed_ref(), 0, exception);
-          })};
+value context::eval_script(const std::string& script,
+                           const std::string& source_url) {
+  return {*this,
+          try_throwable(
+              [this, js_script{details::string_wrapper{script}},
+               js_url{details::string_wrapper{source_url}}](auto exception) {
+                return JSEvaluateScript(_ref, js_script.managed_ref(), nullptr,
+                                        js_url.managed_ref(), 0, exception);
+              })};
 }
 
 JSValueRef context::callback_class_call(JSContextRef ctx, JSObjectRef function,

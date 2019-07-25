@@ -65,8 +65,11 @@ struct context {
   inline value val(bool b) { return {*this, JSValueMakeBoolean(_ref, b)}; }
   inline value val(int i) { return val(static_cast<double>(i)); }
   inline value val(double num) { return {*this, JSValueMakeNumber(_ref, num)}; }
-  inline value val(const char* str) { return val(std::string{str}); }
-  inline value val(std::string str) {
+  inline value val(const char* str) {
+    const auto js_string = details::string_wrapper{str};
+    return {*this, JSValueMakeString(_ref, js_string.managed_ref())};
+  }
+  inline value val(const std::string& str) {
     const auto js_string = details::string_wrapper{str};
     return {*this, JSValueMakeString(_ref, js_string.managed_ref())};
   }
@@ -94,12 +97,11 @@ struct context {
  public:
   template <typename callback_type>
   inline object callable(callback_type callback) {
-    const auto callback_func = [&callback](JSContextRef ctx,
-                                           JSObjectRef function,
-                                           JSObjectRef this_object,
-                                           size_t argument_count,
-                                           const JSValueRef arguments[],
-                                           JSValueRef* exception) {
+    auto callback_func = [callback{std::move(callback)}](
+                             JSContextRef ctx, JSObjectRef function,
+                             JSObjectRef this_object, size_t argument_count,
+                             const JSValueRef arguments[],
+                             JSValueRef* exception) {
       context global_context{JSContextGetGlobalContext(ctx)};
       object this_obj{global_context, this_object};
       std::vector<value> vector;
@@ -129,15 +131,17 @@ struct context {
       }
       return result.ref();
     };
-    return {*this, JSObjectMake(_ref, callback_class(),
-                                new internal_callback_type{callback_func})};
+    return {*this,
+            JSObjectMake(_ref, callback_class(),
+                         new internal_callback_type{std::move(callback_func)})};
   }
 
   inline bool ok() const { return _exception.is_undefined(); }
   inline const value& get_exception() const { return _exception; }
   inline void clear_exception() { _exception = undefined(); }
 
-  value eval_script(std::string script, std::string source_url = "<anonymous>");
+  value eval_script(const std::string& script,
+                    const std::string& source_url = "<anonymous>");
 
  private:
   JSGlobalContextRef _ref;
@@ -157,9 +161,9 @@ struct context {
       t(&exception);
       set_exception({*this, exception});
     } else {
-      const auto result = t(&exception);
+      auto result = t(&exception);
       set_exception({*this, exception});
-      return result;
+      return std::move(result);
     }
   }
 
@@ -173,13 +177,13 @@ struct context {
   }
 
  public:
-  inline object error(std::string message) {
+  inline object error(const std::string& message) {
     // TODO: Add error subclassing
-    const auto error_class = root()["Error"].get().to_object();
     const auto message_val = val(message);
     const auto message_ref = message_val.ref();
     return {*this,
-            try_throwable([this, &error_class, &message_ref](auto exception) {
+            try_throwable([this, error_class{root()["Error"].get().to_object()},
+                           &message_ref](auto exception) {
               return JSObjectCallAsConstructor(_ref, error_class.ref(), 1,
                                                &message_ref, exception);
             })};

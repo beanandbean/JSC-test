@@ -10,7 +10,7 @@ namespace jsc {
 template <typename property_type>
 struct property {
   inline property(const object& obj, property_type prop)
-      : _obj{obj}, _prop{prop} {}
+      : _obj{obj}, _prop{std::move(prop)} {}
 
   inline property(const property<property_type>& prop)
       : _obj{prop._obj}, _prop{prop._prop} {}
@@ -29,7 +29,7 @@ struct property {
 
   template <typename val_type>
   inline void set(val_type val) const {
-    _obj.set_property(_prop, val);
+    _obj.set_property(_prop, std::move(val));
   }
 
   template <typename val_type, typename = std::enable_if_t<!std::is_same_v<

@@ -22,7 +22,8 @@ object& object::operator=(const object& obj) {
   return *this;
 }
 
-property<details::string_wrapper> object::operator[](std::string name) const {
+property<details::string_wrapper> object::operator[](
+    const std::string& name) const {
   return {*this, name};
 }
 
@@ -32,18 +33,18 @@ property<unsigned int> object::operator[](unsigned int index) const {
 
 bool object::is_function() const { return JSObjectIsFunction(_ctx._ref, _ref); }
 
-bool object::has_property(details::string_wrapper name) const {
+bool object::has_property(const details::string_wrapper& name) const {
   return JSObjectHasProperty(_ctx._ref, _ref, name.managed_ref());
 }
 
-bool object::remove_property(details::string_wrapper name) const {
+bool object::remove_property(const details::string_wrapper& name) const {
   return _ctx.try_throwable([this, &name](auto exception) {
     return JSObjectDeleteProperty(_ctx._ref, _ref, name.managed_ref(),
                                   exception);
   });
 }
 
-value object::get_property(details::string_wrapper name) const {
+value object::get_property(const details::string_wrapper& name) const {
   return {_ctx, _ctx.try_throwable([this, &name](auto exception) {
             return JSObjectGetProperty(_ctx._ref, _ref, name.managed_ref(),
                                        exception);
@@ -57,13 +58,14 @@ value object::get_property(unsigned int index) const {
           })};
 }
 
-void object::set_property(details::string_wrapper name, value val) const {
+void object::set_property(const details::string_wrapper& name,
+                          const value& val) const {
   _ctx.try_throwable([this, &name, &val](auto exception) {
     JSObjectSetProperty(_ctx._ref, _ref, name.managed_ref(), val.ref(),
                         kJSPropertyAttributeNone, exception);
   });
 }
-void object::set_property(unsigned int index, value val) const {
+void object::set_property(unsigned int index, const value& val) const {
   _ctx.try_throwable([this, &index, &val](auto exception) {
     JSObjectSetPropertyAtIndex(_ctx._ref, _ref, index, val.ref(), exception);
   });

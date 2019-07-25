@@ -44,7 +44,7 @@ struct generator {
   inline void write_elems() noexcept {}
   template <typename... arg_type>
   inline void write_elems(std::string str, arg_type&&... args) {
-    write_raw(str);
+    write_raw(std::move(str));
     write_elems(std::forward<arg_type>(args)...);
   }
   template <typename... arg_type>
@@ -296,10 +296,11 @@ struct generator {
   }
 
   inline void write_node(const ast::unary_expression& unary) {
-    const std::string op_symbol{symbol_for(unary.op)};
-    write_elems(op_symbol);
+    std::string op_symbol{symbol_for(unary.op)};
     if (op_symbol.size() > 1) {
-      write_elems(" ");
+      write_elems(std::move(op_symbol), " ");
+    } else {
+      write_elems(std::move(op_symbol));
     }
 
     if (precedence_for(unary.argument) < precedence<ast::unary_expression>) {
@@ -512,7 +513,7 @@ struct generator {
     } else {
       write_elems(node.left);
     }
-    write_elems(" ", op, " ", node.right, ") ", node.body);
+    write_elems(" ", std::move(op), " ", node.right, ") ", node.body);
   }
 
   inline void write_function_body(const utils::move_vector<ast::node>& params,
@@ -534,7 +535,7 @@ struct generator {
 
   template <typename node_type>
   inline void write_control_interrupt(const node_type& node, std::string name) {
-    write_elems(name);
+    write_elems(std::move(name));
     if (node.label.has_value()) {
       write_elems(" ", node.label.value());
     }
@@ -646,7 +647,7 @@ struct generator {
     }
   }
 
-  void write_raw(std::string str);
+  void write_raw(const std::string& str);
 };  // namespace jsast
 
 }  // namespace jsast

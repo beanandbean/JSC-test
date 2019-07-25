@@ -2,7 +2,7 @@
 
 namespace jsast {
 
-void generator::write_raw(std::string str) {
+void generator::write_raw(const std::string& str) {
   _buffer << str;
 
   // UTF-8 line counting
@@ -51,7 +51,7 @@ inline bool binary_operand_needs_parenthesis(const parent_type& parent,
   } else if (node_precedence != precedence<parent_type>) {
     return node_precedence < precedence<parent_type>;
   } else if (node.is<ast::binary_expression>()) {
-    auto& binary{node.as<ast::binary_expression>()};
+    const auto& binary{node.as<ast::binary_expression>()};
     if constexpr (std::is_same_v<parent_type, ast::binary_expression>) {
       if (binary.op == binary_op::power && parent.op == binary_op::power) {
         return loc != binary_operand_location::right;
@@ -59,7 +59,7 @@ inline bool binary_operand_needs_parenthesis(const parent_type& parent,
     }
     return binary_operand_needs_parenthesis_by_operator(parent, binary, loc);
   } else if (node.is<ast::logical_expression>()) {
-    auto& logical{node.as<ast::logical_expression>()};
+    const auto& logical{node.as<ast::logical_expression>()};
     return binary_operand_needs_parenthesis_by_operator(parent, logical, loc);
   } else {
     return false;
