@@ -91,9 +91,7 @@ int main() {
                                    true}}}},
                        false,
                        true},
-                   {jsast::ast::identifier{"ratio"}}}
-
-               ,
+                   {jsast::ast::identifier{"ratio"}}},
                jsast::ast::block_statement{{jsast::ast::switch_statement{
                    jsast::ast::identifier{"asserted"},
                    {jsast::ast::switch_case{jsast::ast::number_literal{0}, {}},
@@ -120,7 +118,7 @@ int main() {
                jsast::ast::identifier{"system"},
                jsast::ast::member_identifier{"93: ratio"}}}}}}}});
 
-  std::cout << gen.str();
+  std::cout << std::move(gen).str();
 
   return 0;
 }

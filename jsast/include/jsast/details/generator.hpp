@@ -27,10 +27,11 @@ struct generator {
     write_statement(node);
   }
 
-  inline std::string str() const { return _buffer.str(); }
+  inline std::string str() const& { return _buffer; }
+  inline std::string str() && { return std::move(_buffer); }
 
  private:
-  std::ostringstream _buffer;
+  std::string _buffer;
   source_loc _loc{1, 1};
   size_t _indent_level{0};
 
@@ -648,7 +649,7 @@ struct generator {
   }
 
   void write_raw(const std::string& str);
-};  // namespace jsast
+};
 
 }  // namespace jsast
 

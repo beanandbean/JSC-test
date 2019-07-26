@@ -3,7 +3,7 @@
 namespace jsast {
 
 void generator::write_raw(const std::string& str) {
-  _buffer << str;
+  _buffer.append(str);
 
   // UTF-8 line counting
   for (size_t i{0}; i < str.length(); i++) {
