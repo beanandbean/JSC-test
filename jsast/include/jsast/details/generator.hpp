@@ -304,7 +304,11 @@ struct generator {
       write_elems(std::move(op_symbol));
     }
 
-    if (precedence_for(unary.argument) < precedence<ast::unary_expression>) {
+    // test for precedence, as well as forms like +(+a), -(-a)
+    if (precedence_for(unary.argument) < precedence<ast::unary_expression> ||
+        ((unary.op == unary_op::positive || unary.op == unary_op::negative) &&
+         unary.argument.is<ast::unary_expression>() &&
+         unary.argument.as<ast::unary_expression>().op == unary.op)) {
       write_elems("(", unary.argument, ")");
     } else {
       write_elems(unary.argument);

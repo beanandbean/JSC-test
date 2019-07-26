@@ -91,7 +91,11 @@ int main() {
                                    true}}}},
                        false,
                        true},
-                   {jsast::ast::identifier{"ratio"}}},
+                   {jsast::ast::unary_expression{
+                       jsast::unary_op::negative,
+                       jsast::ast::unary_expression{
+                           jsast::unary_op::negative,
+                           jsast::ast::identifier{"ratio"}}}}},
                jsast::ast::block_statement{{jsast::ast::switch_statement{
                    jsast::ast::identifier{"asserted"},
                    {jsast::ast::switch_case{jsast::ast::number_literal{0}, {}},
