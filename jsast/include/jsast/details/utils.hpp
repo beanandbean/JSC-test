@@ -9,10 +9,14 @@ namespace jsast::utils {
 
 template <typename elem_type>
 struct move_vector : std::vector<elem_type> {
+  move_vector() {}
   template <typename... arg_type>
-  move_vector(arg_type&&... args) {
-    push_all(std::forward<arg_type>(args)...);
+  move_vector(elem_type&& n, arg_type&&... args) {
+    push_all(std::move(n), std::forward<arg_type>(args)...);
   }
+
+  move_vector(move_vector<elem_type>&& vec)
+      : std::vector<elem_type>{std::move(vec)} {}
 
  private:
   inline void push_all() noexcept {}

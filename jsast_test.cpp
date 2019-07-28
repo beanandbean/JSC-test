@@ -10,14 +10,14 @@ int main() {
       {jsast::ast::identifier{"ratio"}},
       jsast::ast::block_statement{
           {jsast::ast::variable_declaration{
-               jsast::ast::variable_declarator{
+               {jsast::ast::variable_declarator{
                    jsast::ast::identifier{"value"},
                    jsast::ast::new_expression{
                        jsast::ast::call_expression{
                            jsast::ast::identifier{"f"},
                            {jsast::ast::identifier{"hello"},
                             jsast::ast::number_literal{13}}},
-                       {}}},
+                       {}}}},
                jsast::variable_declaration_type::var},
            jsast::ast::labeled_statement{
                "first",
@@ -57,7 +57,7 @@ int main() {
            jsast::ast::expression_statement{jsast::ast::unary_expression{
                jsast::unary_op::delete_op, jsast::ast::identifier{"value"}}},
            jsast::ast::variable_declaration{
-               jsast::ast::variable_declarator{
+               {jsast::ast::variable_declarator{
                    jsast::ast::array_pattern{{jsast::ast::identifier{"a"},
                                               std::nullopt,
                                               jsast::ast::identifier{"b"}}},
@@ -69,7 +69,7 @@ int main() {
                                 jsast::ast::number_literal{2},
                                 jsast::ast::number_literal{3}}},
                            true},
-                       {}}}},
+                       {}}}}},
                jsast::variable_declaration_type::let},
            jsast::ast::for_of_statement{
                jsast::ast::variable_declaration{
