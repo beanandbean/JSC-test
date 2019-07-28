@@ -35,7 +35,7 @@ struct value {
 
   object to_object() const;
 
-  inline const JSValueRef ref() const { return _ref; }
+  inline JSValueRef ref() const { return _ref; }
 
  private:
   context& _ctx;

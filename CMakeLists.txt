@@ -6,6 +6,7 @@ endif()
 
 project(jscutils LANGUAGES CXX)
 
+set(CMAKE_CXX_FLAGS "-Wall -Wextra -pedantic")
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 add_subdirectory(jsc)

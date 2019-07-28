@@ -6,7 +6,7 @@
 
 #include <jsc/jsc.hpp>
 
-int main(int argc, const char* argv[]) {
+int main(int, const char* []) {
   auto ctx = jsc::context{};
   const auto result1 = ctx.eval_script("1 + 2 + 3").to_number();
   if (ctx.ok()) {
@@ -31,7 +31,7 @@ int main(int argc, const char* argv[]) {
 
   ctx.clear_exception();
   ctx.root()["run"] =
-      ctx.callable([](auto ctx, auto this_object, auto args, auto exception) {
+      ctx.callable([](auto ctx, auto, auto args, auto exception) {
         if (args.size() == 0) {
           *exception = ctx.error("To few arguments!");
         } else if (args.size() == 1) {

@@ -38,7 +38,7 @@ struct object {
     return callWithThisRef(obj._ref, std::forward<arg_type>(args)...);
   }
 
-  inline const JSObjectRef ref() const { return _ref; }
+  inline JSObjectRef ref() const { return _ref; }
 
  private:
   context& _ctx;

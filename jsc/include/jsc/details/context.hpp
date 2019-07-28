@@ -98,7 +98,7 @@ struct context {
   template <typename callback_type>
   inline object callable(callback_type callback) {
     auto callback_func = [callback{std::move(callback)}](
-                             JSContextRef ctx, JSObjectRef function,
+                             JSContextRef ctx, JSObjectRef,
                              JSObjectRef this_object, size_t argument_count,
                              const JSValueRef arguments[],
                              JSValueRef* exception) {
