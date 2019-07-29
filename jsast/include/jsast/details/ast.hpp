@@ -11,7 +11,7 @@
 namespace jsast::ast {
 
 struct base {
-  explicit inline base() noexcept {}
+  explicit inline base() noexcept = default;
 };
 
 struct program : base {

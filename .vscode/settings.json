@@ -76,5 +76,7 @@
     "strstream": "cpp",
     "thread": "cpp",
     "variant": "cpp"
-  }
+  },
+  "clang-format.style": "file",
+  "C_Cpp.formatting": "Disabled"
 }

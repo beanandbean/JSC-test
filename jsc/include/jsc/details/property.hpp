@@ -21,11 +21,11 @@ struct property {
     return *this;
   }
 
-  inline bool exists() const { return _obj.has_property(_prop); }
+  [[nodiscard]] inline bool exists() const { return _obj.has_property(_prop); }
 
   inline bool remove() const { return _obj.remove_property(_prop); }
 
-  inline value get() const { return _obj.get_property(_prop); }
+  [[nodiscard]] inline value get() const { return _obj.get_property(_prop); }
 
   template <typename val_type>
   inline void set(val_type val) const {

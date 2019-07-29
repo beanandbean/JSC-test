@@ -9,13 +9,13 @@ namespace jsast::utils {
 
 template <typename elem_type>
 struct move_vector : std::vector<elem_type> {
-  move_vector() {}
+  inline move_vector() noexcept = default;
   template <typename... arg_type>
-  move_vector(elem_type&& n, arg_type&&... args) {
+  inline move_vector(elem_type&& n, arg_type&&... args) {
     push_all(std::move(n), std::forward<arg_type>(args)...);
   }
 
-  move_vector(move_vector<elem_type>&& vec)
+  inline move_vector(move_vector<elem_type>&& vec) noexcept
       : std::vector<elem_type>{std::move(vec)} {}
 
  private:
@@ -27,7 +27,7 @@ struct move_vector : std::vector<elem_type> {
   }
 };
 
-inline std::string quoted(const std::string& str) {
+[[nodiscard]] inline std::string quoted(const std::string& str) {
   std::ostringstream oss;
   oss << '"';
   for (size_t i{0}; i < str.size(); i++) {
@@ -66,7 +66,7 @@ inline std::string quoted(const std::string& str) {
   return oss.str();
 }
 
-inline std::string backquoted(const std::string& str) {
+[[nodiscard]] inline std::string backquoted(const std::string& str) {
   std::ostringstream oss;
   for (size_t i{0}; i < str.size(); i++) {
     const auto c{static_cast<uint8_t>(str[i])};

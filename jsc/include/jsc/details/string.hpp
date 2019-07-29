@@ -24,13 +24,13 @@ struct string_wrapper {
     return *this;
   }
 
-  inline std::string get() const {
+  [[nodiscard]] inline std::string get() const {
     const auto length{JSStringGetMaximumUTF8CStringSize(_ref)};
     auto buffer{std::make_unique<char[]>(length)};
     JSStringGetUTF8CString(_ref, buffer.get(), length);
     return buffer.get();
   }
-  inline JSStringRef managed_ref() const { return _ref; }
+  [[nodiscard]] inline JSStringRef managed_ref() const { return _ref; }
 
  private:
   JSStringRef _ref;

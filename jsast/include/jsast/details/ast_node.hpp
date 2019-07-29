@@ -18,10 +18,10 @@ struct node {
   struct impl_base {
     friend node;
 
-    virtual ~impl_base() noexcept {}
-    virtual base& get() = 0;
-    virtual const base& get() const = 0;
-    virtual std::type_index type() const = 0;
+    virtual ~impl_base() noexcept = default;
+    [[nodiscard]] virtual base& get() = 0;
+    [[nodiscard]] virtual const base& get() const = 0;
+    [[nodiscard]] virtual std::type_index type() const = 0;
 
    private:
     virtual void write_to(generator& g) const = 0;
@@ -32,12 +32,14 @@ struct node {
   struct impl : impl_base {
     inline impl(node_type&& node) : _node{std::forward<node_type>(node)} {}
 
-    base& get() override { return _node; }
-    const base& get() const override { return _node; }
-    std::type_index type() const override { return typeid(node_type); }
+    [[nodiscard]] base& get() override { return _node; }
+    [[nodiscard]] const base& get() const override { return _node; }
+    [[nodiscard]] std::type_index type() const override {
+      return typeid(node_type);
+    }
     void write_to(generator& g) const override;
 
-   protected:
+   private:
     node_type _node;
   };
 
@@ -65,20 +67,20 @@ struct node {
       : _impl{std::make_unique<impl_with_callback<node_type, callback_type>>(
             std::forward<node_type>(node), callback)} {}
 
-  inline base& get() { return _impl->get(); }
-  inline const base& get() const { return _impl->get(); }
-  inline std::type_index type() const { return _impl->type(); }
+  [[nodiscard]] inline base& get() { return _impl->get(); }
+  [[nodiscard]] inline const base& get() const { return _impl->get(); }
+  [[nodiscard]] inline std::type_index type() const { return _impl->type(); }
 
   template <typename node_type>
-  inline bool is() const {
+  [[nodiscard]] inline bool is() const {
     return type() == typeid(node_type);
   }
   template <typename node_type>
-  inline node_type& as() {
+  [[nodiscard]] inline node_type& as() {
     return static_cast<node_type&>(get());
   }
   template <typename node_type>
-  inline const node_type& as() const {
+  [[nodiscard]] inline const node_type& as() const {
     return static_cast<const node_type&>(get());
   }
 

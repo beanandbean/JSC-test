@@ -55,7 +55,7 @@ inline size_t precedence_for_type(std::type_index node) noexcept {
   }
 }
 
-inline size_t precedence_for(const ast::node& node) {
+[[nodiscard]] inline size_t precedence_for(const ast::node& node) {
   return precedence_for_type(node.type());
 }
 

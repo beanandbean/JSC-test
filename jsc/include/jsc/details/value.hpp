@@ -22,20 +22,20 @@ struct value {
   value(const value& val);
   value& operator=(const value& val);
 
-  bool is_undefined() const;
-  bool is_null() const;
-  bool is_boolean() const;
-  bool is_number() const;
-  bool is_string() const;
-  bool is_object() const;
+  [[nodiscard]] bool is_undefined() const;
+  [[nodiscard]] bool is_null() const;
+  [[nodiscard]] bool is_boolean() const;
+  [[nodiscard]] bool is_number() const;
+  [[nodiscard]] bool is_string() const;
+  [[nodiscard]] bool is_object() const;
 
-  bool to_boolean() const;
-  double to_number() const;
-  std::string to_string() const;
+  [[nodiscard]] bool to_boolean() const;
+  [[nodiscard]] double to_number() const;
+  [[nodiscard]] std::string to_string() const;
 
-  object to_object() const;
+  [[nodiscard]] object to_object() const;
 
-  inline JSValueRef ref() const { return _ref; }
+  [[nodiscard]] inline JSValueRef ref() const { return _ref; }
 
  private:
   context& _ctx;

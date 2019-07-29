@@ -27,7 +27,7 @@ struct object {
   property<details::string_wrapper> operator[](const std::string& name) const;
   property<unsigned int> operator[](unsigned int index) const;
 
-  bool is_function() const;
+  [[nodiscard]] bool is_function() const;
 
   template <typename... arg_type>
   inline value call(arg_type&&... args) const {
@@ -38,14 +38,14 @@ struct object {
     return callWithThisRef(obj._ref, std::forward<arg_type>(args)...);
   }
 
-  inline JSObjectRef ref() const { return _ref; }
+  [[nodiscard]] inline JSObjectRef ref() const { return _ref; }
 
  private:
   context& _ctx;
   JSObjectRef _ref;
 
-  bool has_property(const details::string_wrapper& name) const;
-  inline bool has_property(unsigned int index) const {
+  [[nodiscard]] bool has_property(const details::string_wrapper& name) const;
+  [[nodiscard]] inline bool has_property(unsigned int index) const {
     return has_property(std::to_string(index));
   }
 
@@ -54,8 +54,8 @@ struct object {
     return remove_property(std::to_string(index));
   }
 
-  value get_property(const details::string_wrapper& name) const;
-  value get_property(unsigned int index) const;
+  [[nodiscard]] value get_property(const details::string_wrapper& name) const;
+  [[nodiscard]] value get_property(unsigned int index) const;
 
   void set_property(const details::string_wrapper& name,
                     const value& val) const;

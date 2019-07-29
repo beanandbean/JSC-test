@@ -9,6 +9,9 @@
 #include "string.hpp"
 #include "value.hpp"
 
+// Testing
+#include <iostream>
+
 namespace jsc {
 
 struct context_group {
@@ -58,28 +61,38 @@ struct context {
     return *this;
   }
 
-  inline value val(jsc::tag_undefined) {
+  [[nodiscard]] inline value val(jsc::tag_undefined) {
     return {*this, JSValueMakeUndefined(_ref)};
   }
-  inline value val(jsc::tag_null) { return {*this, JSValueMakeNull(_ref)}; }
-  inline value val(bool b) { return {*this, JSValueMakeBoolean(_ref, b)}; }
-  inline value val(int i) { return val(static_cast<double>(i)); }
-  inline value val(double num) { return {*this, JSValueMakeNumber(_ref, num)}; }
-  inline value val(const char* str) {
+  [[nodiscard]] inline value val(jsc::tag_null) {
+    return {*this, JSValueMakeNull(_ref)};
+  }
+  [[nodiscard]] inline value val(bool b) {
+    return {*this, JSValueMakeBoolean(_ref, b)};
+  }
+  [[nodiscard]] inline value val(int i) { return val(static_cast<double>(i)); }
+  [[nodiscard]] inline value val(double num) {
+    return {*this, JSValueMakeNumber(_ref, num)};
+  }
+  [[nodiscard]] inline value val(const char* str) {
     const auto js_string = details::string_wrapper{str};
     return {*this, JSValueMakeString(_ref, js_string.managed_ref())};
   }
-  inline value val(const std::string& str) {
+  [[nodiscard]] inline value val(const std::string& str) {
     const auto js_string = details::string_wrapper{str};
     return {*this, JSValueMakeString(_ref, js_string.managed_ref())};
   }
-  inline value val(object obj) { return obj; }
+  [[nodiscard]] inline value val(object obj) { return obj; }
 
-  inline value undefined() { return val(jsc::undefined); }
-  inline value null() { return val(jsc::null); }
+  [[nodiscard]] inline value undefined() { return val(jsc::undefined); }
+  [[nodiscard]] inline value null() { return val(jsc::null); }
 
-  inline object root() { return {*this, JSContextGetGlobalObject(_ref)}; }
-  inline object obj() { return {*this, JSObjectMake(_ref, nullptr, nullptr)}; }
+  [[nodiscard]] inline object root() {
+    return {*this, JSContextGetGlobalObject(_ref)};
+  }
+  [[nodiscard]] inline object obj() {
+    return {*this, JSObjectMake(_ref, nullptr, nullptr)};
+  }
 
  private:
   using internal_callback_type =
@@ -92,7 +105,18 @@ struct context {
                                         const JSValueRef arguments[],
                                         JSValueRef* exception);
   static void callback_class_finalize(JSObjectRef function);
-  JSClassRef callback_class();
+
+  inline JSClassRef callback_class() {
+    if (_callback_class == nullptr) {
+      JSClassDefinition def{kJSClassDefinitionEmpty};
+      def.className = "NativeCallback";
+      def.attributes = kJSClassAttributeNone;
+      def.callAsFunction = callback_class_call;
+      def.finalize = callback_class_finalize;
+      _callback_class = JSClassCreate(&def);
+    }
+    return _callback_class;
+  }
 
  public:
   template <typename callback_type>
@@ -136,8 +160,8 @@ struct context {
                          new internal_callback_type{std::move(callback_func)})};
   }
 
-  inline bool ok() const { return _exception.is_undefined(); }
-  inline const value& get_exception() const { return _exception; }
+  [[nodiscard]] inline bool ok() const { return _exception.is_undefined(); }
+  [[nodiscard]] inline const value& get_exception() const { return _exception; }
   inline void clear_exception() { _exception = undefined(); }
 
   value eval_script(const std::string& script,
@@ -177,7 +201,7 @@ struct context {
   }
 
  public:
-  inline object error(const std::string& message) {
+  [[nodiscard]] inline object error(const std::string& message) {
     // TODO: Add error subclassing
     const auto message_val = val(message);
     const auto message_ref = message_val.ref();
@@ -188,7 +212,7 @@ struct context {
                                                &message_ref, exception);
             })};
   }
-};
+};  // namespace jsc
 
 }  // namespace jsc
 

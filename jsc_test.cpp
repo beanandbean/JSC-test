@@ -6,8 +6,8 @@
 
 #include <jsc/jsc.hpp>
 
-int main(int, const char* []) {
-  auto ctx = jsc::context{};
+int main() {
+  jsc::context ctx;
   const auto result1 = ctx.eval_script("1 + 2 + 3").to_number();
   if (ctx.ok()) {
     std::cout << result1 << "\n";

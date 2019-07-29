@@ -27,21 +27,7 @@ JSValueRef context::callback_class_call(JSContextRef ctx, JSObjectRef function,
 }
 
 void context::callback_class_finalize(JSObjectRef function) {
-  auto callback{
-      static_cast<internal_callback_type*>(JSObjectGetPrivate(function))};
-  delete callback;
-}
-
-JSClassRef context::callback_class() {
-  if (_callback_class == nullptr) {
-    JSClassDefinition def{kJSClassDefinitionEmpty};
-    def.className = "NativeCallback";
-    def.attributes = kJSClassAttributeNone;
-    def.callAsFunction = callback_class_call;
-    def.finalize = callback_class_finalize;
-    _callback_class = JSClassCreate(&def);
-  }
-  return _callback_class;
+  delete static_cast<internal_callback_type*>(JSObjectGetPrivate(function));
 }
 
 }  // namespace jsc

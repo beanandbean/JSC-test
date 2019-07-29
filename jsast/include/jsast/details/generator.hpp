@@ -27,8 +27,8 @@ struct generator {
     write_statement(node);
   }
 
-  inline std::string str() const& { return _buffer; }
-  inline std::string str() && { return std::move(_buffer); }
+  [[nodiscard]] inline std::string str() const& { return _buffer; }
+  [[nodiscard]] inline std::string str() && { return std::move(_buffer); }
 
  private:
   std::string _buffer;
@@ -36,7 +36,7 @@ struct generator {
   size_t _indent_level{0};
 
   template <typename callable_type>
-  inline source_range with_range(callable_type callable) {
+  [[nodiscard]] inline source_range with_range(callable_type callable) {
     const auto start{_loc};
     callable();
     return {start, _loc};

@@ -30,7 +30,7 @@ void generator::write_raw(const std::string& str) {
 }
 
 template <typename parent_type, typename node_type>
-inline bool binary_operand_needs_parenthesis_by_operator(
+[[nodiscard]] inline bool binary_operand_needs_parenthesis_by_operator(
     const parent_type& parent, const node_type& node,
     binary_operand_location loc) {
   switch (loc) {
@@ -42,9 +42,9 @@ inline bool binary_operand_needs_parenthesis_by_operator(
 }
 
 template <typename parent_type>
-inline bool binary_operand_needs_parenthesis(const parent_type& parent,
-                                             const ast::node& node,
-                                             binary_operand_location loc) {
+[[nodiscard]] inline bool binary_operand_needs_parenthesis(
+    const parent_type& parent, const ast::node& node,
+    binary_operand_location loc) {
   const auto node_precedence{precedence_for(node)};
   if (node_precedence == precedence_needs_parentheses) {
     return true;

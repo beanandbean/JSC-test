@@ -11,7 +11,8 @@ void node::impl<node_type, enabled>::write_to(generator& g) const {
 template <typename node_type, typename callback_type, typename enabled>
 void node::impl_with_callback<node_type, callback_type, enabled>::write_to(
     generator& g) const {
-  _callback(g.with_range([this, &g]() { g.write_elems(this->_node); }));
+  _callback(g.with_range(
+      [this, &g]() { node::impl<node_type, enabled>::write_to(g); }));
 }
 
 }  // namespace jsast::ast
