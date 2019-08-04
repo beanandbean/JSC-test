@@ -95,7 +95,7 @@ struct generator {
 
   inline void write_node(const ast::switch_case& case_node) {
     if (case_node.test.has_value()) {
-      write_elems("case ", case_node.test.value(), ":");
+      write_elems("case ", *case_node.test, ":");
     } else {
       write_elems("default:");
     }
@@ -114,7 +114,7 @@ struct generator {
   inline void write_node(const ast::catch_clause& clause) {
     write_elems("catch ");
     if (clause.pattern.has_value()) {
-      write_elems("(", clause.pattern.value(), ") ");
+      write_elems("(", *clause.pattern, ") ");
     }
     write_elems(clause.body);
   }
@@ -122,7 +122,7 @@ struct generator {
   inline void write_node(const ast::variable_declarator& declarator) {
     write_elems(declarator.id);
     if (declarator.init.has_value()) {
-      write_elems(" = ", declarator.init.value());
+      write_elems(" = ", *declarator.init);
     }
   }
 
@@ -143,7 +143,7 @@ struct generator {
   inline void write_node(const ast::if_statement& statement) {
     write_elems("if (", statement.test, ") ", statement.consequent);
     if (statement.alternate.has_value()) {
-      write_elems(" else ", statement.alternate.value());
+      write_elems(" else ", *statement.alternate);
     }
   }
 
@@ -171,7 +171,7 @@ struct generator {
   inline void write_node(const ast::return_statement& statement) {
     write_elems("return");
     if (statement.argument.has_value()) {
-      write_elems(" ", statement.argument.value());
+      write_elems(" ", *statement.argument);
     }
     write_elems(";");
   }
@@ -183,10 +183,10 @@ struct generator {
   inline void write_node(const ast::try_statement& statement) {
     write_elems("try ", statement.block);
     if (statement.handler.has_value()) {
-      write_elems(" ", statement.handler.value());
+      write_elems(" ", *statement.handler);
     }
     if (statement.finalizer.has_value()) {
-      write_elems(" finally ", statement.finalizer.value());
+      write_elems(" finally ", *statement.finalizer);
     }
   }
 
@@ -201,7 +201,7 @@ struct generator {
   inline void write_node(const ast::for_statement& statement) {
     write_elems("for (");
     if (statement.init.has_value()) {
-      const auto& init = statement.init.value();
+      const auto& init = *statement.init;
       if (init.is<ast::variable_declaration>()) {
         write_variable_declaration(init.as<ast::variable_declaration>());
       } else {
@@ -210,11 +210,11 @@ struct generator {
     }
     write_elems("; ");
     if (statement.test.has_value()) {
-      write_elems(statement.test.value());
+      write_elems(*statement.test);
     }
     write_elems("; ");
     if (statement.update.has_value()) {
-      write_elems(statement.update.value());
+      write_elems(*statement.update);
     }
     write_elems(") ", statement.body);
   }
@@ -269,7 +269,7 @@ struct generator {
       write_elems("function ");
     }
     if (function.id.has_value()) {
-      write_elems(function.id.value());
+      write_elems(*function.id);
     }
     write_function_body(function.params, function.body);
   }
@@ -404,7 +404,7 @@ struct generator {
       write_elems("yield");
     }
     if (yield.argument.has_value()) {
-      write_elems(" ", yield.argument.value());
+      write_elems(" ", *yield.argument);
     }
   }
 
@@ -542,7 +542,7 @@ struct generator {
   inline void write_control_interrupt(const node_type& node, std::string name) {
     write_elems(std::move(name));
     if (node.label.has_value()) {
-      write_elems(" ", node.label.value());
+      write_elems(" ", *node.label);
     }
     write_elems(";");
   }
@@ -565,7 +565,7 @@ struct generator {
     if (length > 0) {
       for (size_t i{0}; i < length; i++) {
         if (nodes[i].has_value()) {
-          write_elems(nodes[i].value());
+          write_elems(*nodes[i]);
           if (i < length - 1) {
             write_elems(", ");
           }
