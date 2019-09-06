@@ -53,6 +53,26 @@ int main() {
   std::cout << result5 << "\n";
 
   ctx.clear_exception();
+  const auto result61 = ctx.eval_script("run.constructor.name").to_string();
+  if (ctx.ok()) {
+    std::cout << result61 << "\n";
+  }
+
+  ctx.clear_exception();
+  ctx.root()["cont"] = ctx.container<int>(7);
+  const auto result62 = ctx.eval_script("cont.constructor.name").to_string();
+  if (ctx.ok()) {
+    std::cout << result62 << "\n";
+  }
+
+  std::cout << ctx.root()["run"].get().to_object().is_function() << " "
+            << ctx.root()["cont"].get().to_object().is_function() << "\n";
+
+  auto str_container = ctx.container<std::string>("Hello");
+  std::cout << str_container.is_container<std::string>() << " "
+            << *str_container.get_contained<std::string>() << "\n";
+
+  ctx.clear_exception();
   std::ifstream input{"../test/sudoku_v1.js"};
   std::ostringstream buffer;
   buffer << input.rdbuf();
@@ -69,9 +89,9 @@ int main() {
   }
 
   ctx.eval_script(u8"\"你好世界\"; throw new Error();");
-  const auto result6 =
+  const auto result7 =
       ctx.get_exception().to_object()["stack"].get().to_string();
-  std::cout << result6 << "\n";
+  std::cout << result7 << "\n";
 
   return 0;
 }

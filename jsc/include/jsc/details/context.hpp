@@ -45,12 +45,7 @@ struct context {
   inline context(JSGlobalContextRef ref) : _ref{ref}, _exception{undefined()} {
     JSGlobalContextRetain(_ref);
   }
-  inline ~context() {
-    if (_callback_class != nullptr) {
-      JSClassRelease(_callback_class);
-    }
-    JSGlobalContextRelease(_ref);
-  }
+  inline ~context() { JSGlobalContextRelease(_ref); }
 
   inline context(const context& ctx) : _ref{ctx._ref}, _exception{undefined()} {
     JSGlobalContextRetain(_ref);
@@ -104,21 +99,47 @@ struct context {
                                         size_t argument_count,
                                         const JSValueRef arguments[],
                                         JSValueRef* exception);
-  static void callback_class_finalize(JSObjectRef function);
 
-  inline JSClassRef callback_class() {
+  template <typename object_type>
+  static void container_finalize(JSObjectRef container) {
+    delete static_cast<object_type*>(JSObjectGetPrivate(container));
+  }
+
+  inline static JSClassRef callback_class() {
+    static JSClassRef _callback_class = nullptr;
     if (_callback_class == nullptr) {
       JSClassDefinition def{kJSClassDefinitionEmpty};
-      def.className = "NativeCallback";
+      def.className = nullptr;
       def.attributes = kJSClassAttributeNone;
       def.callAsFunction = callback_class_call;
-      def.finalize = callback_class_finalize;
+      def.finalize = container_finalize<internal_callback_type>;
       _callback_class = JSClassCreate(&def);
     }
     return _callback_class;
   }
 
+  // Non-callable
+  template <typename object_type>
+  inline static JSClassRef container_class() {
+    static JSClassRef _container_class = nullptr;
+    if (_container_class == nullptr) {
+      JSClassDefinition def{kJSClassDefinitionEmpty};
+      def.className = nullptr;
+      def.attributes = kJSClassAttributeNone;
+      def.finalize = container_finalize<object_type>;
+      _container_class = JSClassCreate(&def);
+    }
+    return _container_class;
+  }
+
  public:
+  template <typename object_type, typename... arg_type>
+  inline object container(arg_type&&... args) {
+    return {*this,
+            JSObjectMake(_ref, container_class<object_type>(),
+                         new object_type{std::forward<arg_type>(args)...})};
+  }
+
   template <typename callback_type>
   inline object callable(callback_type callback) {
     auto callback_func = [callback{std::move(callback)}](
@@ -170,7 +191,6 @@ struct context {
  private:
   JSGlobalContextRef _ref;
   value _exception;
-  JSClassRef _callback_class = nullptr;
 
   inline void set_exception(value exception) {
     if (!exception.is_undefined()) {
@@ -212,7 +232,7 @@ struct context {
                                                &message_ref, exception);
             })};
   }
-};  // namespace jsc
+};
 
 }  // namespace jsc
 

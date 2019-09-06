@@ -25,6 +25,12 @@ struct parameter_pack_counter<t0, types...> {
 
 }  // namespace utils
 
+template <typename object_type>
+[[nodiscard]] bool object::is_container() const {
+  return JSValueIsObjectOfClass(_ctx._ref, _ref,
+                                context::container_class<object_type>());
+}
+
 template <typename property_type, typename val_type, typename>
 inline void object::set_property(const property_type& prop,
                                  val_type&& val) const {
@@ -33,6 +39,7 @@ inline void object::set_property(const property_type& prop,
 
 template <typename... arg_type>
 value object::callWithThisRef(JSObjectRef obj, arg_type&&... args) const {
+  assert(is_function());
   if constexpr (utils::parameter_pack_count<arg_type...> == 0) {
     return {_ctx, _ctx.try_throwable([this, &obj](auto exception) {
               return JSObjectCallAsFunction(_ctx._ref, _ref, obj, 0, nullptr,

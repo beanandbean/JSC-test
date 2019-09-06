@@ -75,7 +75,20 @@
     "set": "cpp",
     "strstream": "cpp",
     "thread": "cpp",
-    "variant": "cpp"
+    "variant": "cpp",
+    "clocale": "cpp",
+    "complex": "cpp",
+    "future": "cpp",
+    "numeric": "cpp",
+    "queue": "cpp",
+    "random": "cpp",
+    "stack": "cpp",
+    "valarray": "cpp",
+    "bit": "cpp",
+    "*.tcc": "cpp",
+    "memory_resource": "cpp",
+    "cfenv": "cpp",
+    "cinttypes": "cpp"
   },
   "clang-format.style": "file",
   "C_Cpp.formatting": "Disabled"

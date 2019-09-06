@@ -26,8 +26,4 @@ JSValueRef context::callback_class_call(JSContextRef ctx, JSObjectRef function,
                      exception);
 }
 
-void context::callback_class_finalize(JSObjectRef function) {
-  delete static_cast<internal_callback_type*>(JSObjectGetPrivate(function));
-}
-
 }  // namespace jsc

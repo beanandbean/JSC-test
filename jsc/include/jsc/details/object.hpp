@@ -29,6 +29,15 @@ struct object {
 
   [[nodiscard]] bool is_function() const;
 
+  template <typename object_type>
+  [[nodiscard]] bool is_container() const;
+
+  template <typename object_type>
+  [[nodiscard]] object_type* get_contained() const {
+    assert(is_container<object_type>());
+    return static_cast<object_type*>(JSObjectGetPrivate(_ref));
+  }
+
   template <typename... arg_type>
   inline value call(arg_type&&... args) const {
     return callWithThisRef(nullptr, std::forward<arg_type>(args)...);
