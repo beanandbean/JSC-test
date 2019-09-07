@@ -27,22 +27,22 @@ struct parameter_pack_counter<t0, types...> {
 
 template <typename object_type>
 [[nodiscard]] bool object::is_container() const {
-  return JSValueIsObjectOfClass(_ctx._ref, _ref,
+  return JSValueIsObjectOfClass(_ctx->_ref, _ref,
                                 context::container_class<object_type>());
 }
 
 template <typename property_type, typename val_type, typename>
 inline void object::set_property(const property_type& prop,
                                  val_type&& val) const {
-  set_property(prop, _ctx.val(std::forward<val_type>(val)));
+  set_property(prop, _ctx->val(std::forward<val_type>(val)));
 }
 
 template <typename... arg_type>
 value object::callWithThisRef(JSObjectRef obj, arg_type&&... args) const {
   assert(is_function());
   if constexpr (utils::parameter_pack_count<arg_type...> == 0) {
-    return {_ctx, _ctx.try_throwable([this, &obj](auto exception) {
-              return JSObjectCallAsFunction(_ctx._ref, _ref, obj, 0, nullptr,
+    return {*_ctx, _ctx->try_throwable([this, &obj](auto exception) {
+              return JSObjectCallAsFunction(_ctx->_ref, _ref, obj, 0, nullptr,
                                             exception);
             })};
   } else {
@@ -52,8 +52,8 @@ value object::callWithThisRef(JSObjectRef obj, arg_type&&... args) const {
     std::transform(arg_list.begin(), arg_list.end(), ref_list.begin(),
                    [](const auto val) { return val.ref(); });
 
-    return {_ctx, _ctx.try_throwable([this, &obj, &ref_list](auto exception) {
-              return JSObjectCallAsFunction(_ctx._ref, _ref, obj,
+    return {*_ctx, _ctx->try_throwable([this, &obj, &ref_list](auto exception) {
+              return JSObjectCallAsFunction(_ctx->_ref, _ref, obj,
                                             ref_list.size(), ref_list.data(),
                                             exception);
             })};
@@ -65,7 +65,7 @@ inline value object::transform_arg(arg_type&& arg) const {
   if constexpr (std::is_same_v<std::decay_t<arg_type>, value>) {
     return std::forward<arg_type>(arg);
   } else {
-    return _ctx.val(std::forward<arg_type>(arg));
+    return _ctx->val(std::forward<arg_type>(arg));
   }
 }
 

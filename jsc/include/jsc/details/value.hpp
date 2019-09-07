@@ -38,7 +38,7 @@ struct value {
   [[nodiscard]] inline JSValueRef ref() const { return _ref; }
 
  private:
-  context& _ctx;
+  context* _ctx;
   JSValueRef _ref;
 };
 

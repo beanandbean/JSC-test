@@ -22,7 +22,7 @@ struct object {
   object(const object& obj);
   object& operator=(const object& obj);
 
-  inline operator value() const { return {_ctx, _ref}; }
+  inline operator value() const { return {*_ctx, _ref}; }
 
   property<details::string_wrapper> operator[](const std::string& name) const;
   property<unsigned int> operator[](unsigned int index) const;
@@ -50,7 +50,7 @@ struct object {
   [[nodiscard]] inline JSObjectRef ref() const { return _ref; }
 
  private:
-  context& _ctx;
+  context* _ctx;
   JSObjectRef _ref;
 
   [[nodiscard]] bool has_property(const details::string_wrapper& name) const;
