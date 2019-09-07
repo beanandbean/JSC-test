@@ -157,19 +157,22 @@ struct context {
       value result = global_context.undefined();
       value exception_placeholder = global_context.undefined();
       if constexpr (std::is_same_v<decltype(callback(global_context, this_obj,
-                                                     vector,
+                                                     std::move(vector),
                                                      &exception_placeholder)),
                                    void>) {
-        callback(global_context, this_obj, vector, &exception_placeholder);
-      } else if constexpr (std::is_same_v<decltype(callback(
-                                              global_context, this_obj, vector,
-                                              &exception_placeholder)),
+        callback(global_context, this_obj, std::move(vector),
+                 &exception_placeholder);
+      } else if constexpr (std::is_same_v<decltype(
+                                              callback(global_context, this_obj,
+                                                       std::move(vector),
+                                                       &exception_placeholder)),
                                           value>) {
-        result =
-            callback(global_context, this_obj, vector, &exception_placeholder);
+        result = callback(global_context, this_obj, std::move(vector),
+                          &exception_placeholder);
       } else {
-        result = global_context.val(
-            callback(global_context, this_obj, vector, &exception_placeholder));
+        result = global_context.val(callback(global_context, this_obj,
+                                             std::move(vector),
+                                             &exception_placeholder));
       }
       if (!exception_placeholder.is_undefined()) {
         *exception = exception_placeholder.ref();
